@@ -4,6 +4,7 @@ Hệ thống vòng quay may mắn đa sự kiện, tích hợp KiotViet API cho 
 
 ## ✨ Tính năng
 
+- 🎄 **Christmas Theme**: Giao diện Giáng sinh với tuyết rơi, đèn nháy
 - 🎯 **Multi-event**: Hỗ trợ nhiều sự kiện (Noel, Tết, Khai trương...)
 - 🏪 **Multi-branch**: Quản lý chi nhánh với inventory riêng, đồng bộ từ KiotViet
 - 🎁 **Flexible prizes**: Voucher, quà vật lý, giảm giá, không trúng
@@ -12,7 +13,8 @@ Hệ thống vòng quay may mắn đa sự kiện, tích hợp KiotViet API cho 
 - 🔗 **KiotViet API**: Xác thực hóa đơn & đồng bộ chi nhánh realtime
 - 🎲 **Server-side random**: Weighted random đảm bảo công bằng
 - 📜 **Lịch sử quay**: Hiển thị công khai lịch sử quay thưởng với phân trang
-- ✅ **Invoice validation**: Kiểm tra ngày hóa đơn trong thời gian chương trình
+- ✅ **Invoice validation**: Kiểm tra ngày hóa đơn, giá trị tối thiểu
+- ⏱️ **Rate limiting**: Giới hạn 3 lần tra cứu/phút cho mỗi IP
 
 ## 🚀 Quick Start
 
@@ -75,10 +77,10 @@ Truy cập: http://localhost:3000
 2. Admin cấu hình tồn kho cho từng chi nhánh
 3. Khách mua hàng tại cửa hàng, nhận hóa đơn
 4. Khách nhập mã hóa đơn vào /spin
-5. Hệ thống validate với KiotViet (kiểm tra ngày HD)
-6. Tính số lượt quay theo giá trị hóa đơn
-7. Khách quay, hệ thống random quà & trừ kho
-8. Hiển thị kết quả, lưu log
+5. Hệ thống validate với KiotViet (kiểm tra ngày, giá trị HD)
+6. Tính số lượt quay theo công thức (fixed/step)
+7. Khách bấm nút quay ở giữa vòng quay
+8. Hiển thị kết quả bottom sheet, lưu log
 ```
 
 ## 🛠 Tech Stack

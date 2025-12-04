@@ -98,6 +98,7 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 - **RLS**: Row Level Security trong Supabase
 - **Service Role**: Admin APIs dùng service role key
 - **Server-side random**: Không thể cheat từ client
+- **Rate Limiting**: 3 requests/phút cho tra cứu hóa đơn
 
 ## Development
 
@@ -120,11 +121,23 @@ Environment Variables cần set:
 
 ## Recent Updates (Dec 2024)
 
+### UI/UX
+- 🎄 Christmas Theme: gradient đỏ/xanh, tuyết rơi, cây thông
+- 🎡 Nút quay ở giữa vòng quay với glow animation
+- 📱 Bottom sheet cho kết quả (không che vòng quay)
+- 🎯 Vòng quay luôn dừng chính xác giữa ô quà
+- 📱 Mobile responsive header optimization
+
+### Features
 - ✅ Admin authentication với multi-user
-- ✅ Invoice date validation (trong thời gian event)
+- ✅ Invoice date + min value validation
+- ✅ Event rules (eligibility + turn calculation) saving
+- ✅ Rate limiting: 3 lookups/minute per IP
+- ✅ Spin history với phân trang
+- ✅ Branch sync từ KiotViet
+
+### Bug Fixes
 - ✅ Preserve prize IDs khi update event
 - ✅ Fix inventory save với event_id
 - ✅ Fix FK constraints khi delete prizes
-- ✅ Spin history với phân trang
-- ✅ Dashboard với stats realtime
-- ✅ Branch sync từ KiotViet
+- ✅ Fix error messages cho hóa đơn không đủ điều kiện
