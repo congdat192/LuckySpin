@@ -137,7 +137,7 @@ export default function NewEventPage() {
                 alert('Lỗi: ' + data.error);
                 setLoading(false);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi tạo sự kiện');
             setLoading(false);
         }

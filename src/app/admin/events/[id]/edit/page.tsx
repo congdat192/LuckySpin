@@ -96,8 +96,8 @@ export default function EditEventPage() {
                         })));
                     }
                 }
-            } catch (error) {
-                console.error('Error fetching event:', error);
+            } catch {
+                console.error('Error fetching event:');
             } finally {
                 setLoading(false);
             }
@@ -179,7 +179,7 @@ export default function EditEventPage() {
                 alert('Lỗi: ' + data.error);
                 setSaving(false);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi cập nhật sự kiện');
             setSaving(false);
         }

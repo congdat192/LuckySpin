@@ -48,8 +48,8 @@ export default function ReportsPage() {
             if (data.success) {
                 setLogs(data.data || []);
             }
-        } catch (error) {
-            console.error('Error fetching logs:', error);
+        } catch {
+            console.error('Error fetching logs:');
         } finally {
             setLoading(false);
         }
@@ -67,8 +67,8 @@ export default function ReportsPage() {
                 if (data.success) {
                     setBranches(data.data.filter((b: Branch & { is_active?: boolean }) => b.is_active !== false));
                 }
-            } catch (error) {
-                console.error('Error fetching branches:', error);
+            } catch {
+                console.error('Error fetching branches:');
             }
         };
         fetchBranches();

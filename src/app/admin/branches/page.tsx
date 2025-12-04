@@ -29,8 +29,8 @@ export default function BranchesPage() {
             } else {
                 console.error('Error:', data.error);
             }
-        } catch (error) {
-            console.error('Error fetching branches:', error);
+        } catch {
+            console.error('Error fetching branches');
         } finally {
             setLoading(false);
         }
@@ -49,7 +49,7 @@ export default function BranchesPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi đồng bộ');
         } finally {
             setSyncing(false);
@@ -84,7 +84,7 @@ export default function BranchesPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi lưu');
         } finally {
             setSaving(false);
@@ -126,7 +126,7 @@ export default function BranchesPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi tạo chi nhánh');
         } finally {
             setSaving(false);
@@ -146,7 +146,7 @@ export default function BranchesPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi xóa');
         }
     };
@@ -162,8 +162,8 @@ export default function BranchesPage() {
             if (data.success) {
                 await fetchBranches();
             }
-        } catch (error) {
-            console.error('Error toggling status:', error);
+        } catch {
+            console.error('Error toggling status:');
         }
     };
 

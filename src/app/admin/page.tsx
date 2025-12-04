@@ -52,8 +52,8 @@ export default function AdminDashboard() {
                     });
                     setRecentActivity(data.data.recent_activity || []);
                 }
-            } catch (error) {
-                console.error('Error fetching dashboard:', error);
+            } catch {
+                console.error('Error fetching dashboard:');
             } finally {
                 setLoading(false);
             }

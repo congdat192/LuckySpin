@@ -55,8 +55,8 @@ export default function InventoryPage() {
                         setSelectedEventId(data.data[0].id);
                     }
                 }
-            } catch (error) {
-                console.error('Error fetching events:', error);
+            } catch {
+                console.error('Error fetching events:');
             } finally {
                 setLoading(false);
             }
@@ -115,8 +115,8 @@ export default function InventoryPage() {
                 } else {
                     setInventory(new Map());
                 }
-            } catch (error) {
-                console.error('Error fetching event data:', error);
+            } catch {
+                console.error('Error fetching event data:');
             } finally {
                 setLoading(false);
             }
@@ -157,7 +157,7 @@ export default function InventoryPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi lưu');
         } finally {
             setSaving(false);

@@ -7,7 +7,6 @@ import {
     Calendar,
     Play,
     Pause,
-    Eye,
     Edit,
     Trash2,
     CheckCircle,
@@ -46,8 +45,8 @@ export default function EventsPage() {
             if (data.success) {
                 setEvents(data.data || []);
             }
-        } catch (error) {
-            console.error('Error fetching events:', error);
+        } catch {
+            console.error('Error fetching events:');
         } finally {
             setLoading(false);
         }
@@ -79,7 +78,7 @@ export default function EventsPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi cập nhật trạng thái');
         } finally {
             setActionLoading(null);
@@ -102,7 +101,7 @@ export default function EventsPage() {
             } else {
                 alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
+        } catch {
             alert('Lỗi khi xóa sự kiện');
         } finally {
             setActionLoading(null);

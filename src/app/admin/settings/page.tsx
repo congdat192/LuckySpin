@@ -20,7 +20,7 @@ export default function SettingsPage() {
             const response = await fetch('/api/admin/settings/kiotviet-status');
             const data = await response.json();
             setStatus(data);
-        } catch (error) {
+        } catch {
             setStatus({
                 configured: false,
                 connected: false,

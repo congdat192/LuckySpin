@@ -100,12 +100,6 @@ export interface KiotVietInvoice {
     }[];
 }
 
-interface KiotVietInvoicesResponse {
-    total: number;
-    pageSize: number;
-    data: KiotVietInvoice[];
-}
-
 export async function getInvoiceByCode(code: string): Promise<KiotVietInvoice | null> {
     const config = getConfig();
     const token = await getAccessToken();

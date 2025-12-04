@@ -8,6 +8,7 @@ interface ValidationResult {
     is_eligible: boolean;
     total_turns: number;
     remaining_turns: number;
+    invoice_code: string;
     customer: {
         name: string | null;
         phone: string | null;

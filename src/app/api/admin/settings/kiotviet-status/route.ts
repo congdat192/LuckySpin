@@ -47,7 +47,7 @@ export async function GET() {
                     error: error.error_description || 'Không thể kết nối KiotViet API',
                 });
             }
-        } catch (fetchError) {
+        } catch {
             return NextResponse.json({
                 configured: true,
                 connected: false,
