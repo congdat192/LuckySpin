@@ -4,8 +4,52 @@ import { getInvoiceByCode } from '@/lib/kiotviet';
 import { processEventRules } from '@/lib/spin-logic';
 import type { Event, EventRule, Branch, InvoiceSession } from '@/types';
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 3; // requests
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in ms
+
+function checkRateLimit(ip: string): { allowed: boolean; remainingTime?: number } {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+
+    // Clean up old records periodically
+    if (rateLimitMap.size > 10000) {
+        for (const [key, value] of rateLimitMap.entries()) {
+            if (now > value.resetTime) rateLimitMap.delete(key);
+        }
+    }
+
+    if (!record || now > record.resetTime) {
+        // New window
+        rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+        return { allowed: true };
+    }
+
+    if (record.count >= RATE_LIMIT) {
+        const remainingTime = Math.ceil((record.resetTime - now) / 1000);
+        return { allowed: false, remainingTime };
+    }
+
+    record.count++;
+    return { allowed: true };
+}
+
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit check
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+            request.headers.get('x-real-ip') ||
+            'unknown';
+        const rateLimit = checkRateLimit(ip);
+
+        if (!rateLimit.allowed) {
+            return NextResponse.json(
+                { success: false, error: 'Bạn đã tra cứu quá nhanh, vui lòng đợi 1 phút' },
+                { status: 429 }
+            );
+        }
+
         const body = await request.json();
         const { invoice_code, event_id } = body;
 
@@ -77,9 +121,10 @@ export async function POST(request: NextRequest) {
             invoice = await getInvoiceByCode(invoice_code);
         } catch (error) {
             console.error('KiotViet API error:', error);
+            // Generic error for user - could be connection issue or invalid invoice
             return NextResponse.json(
-                { success: false, error: 'Không thể kết nối với hệ thống KiotViet' },
-                { status: 502 }
+                { success: false, error: 'Không tìm thấy hóa đơn hoặc hệ thống đang bận' },
+                { status: 404 }
             );
         }
 

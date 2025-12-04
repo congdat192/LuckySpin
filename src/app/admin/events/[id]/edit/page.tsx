@@ -160,8 +160,14 @@ export default function EditEventPage() {
                     start_date: startDate,
                     end_date: endDate,
                     status,
+                    rules: {
+                        min_invoice_total: rules.min_invoice_total,
+                        turn_formula_type: rules.turn_formula_type,
+                        fixed_turns: rules.fixed_turns,
+                        steps: rules.steps,
+                    },
                     prizes: prizes.map(p => ({
-                        id: p.id, // Preserve prize ID
+                        id: p.id,
                         name: p.name,
                         prize_type: p.prize_type,
                         value: p.value,
@@ -224,6 +230,18 @@ export default function EditEventPage() {
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                 required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Mô tả
+                            </label>
+                            <input
+                                type="text"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                placeholder="VD: Chào đón Giáng sinh 2024"
                             />
                         </div>
                         <div>

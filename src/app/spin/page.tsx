@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import SpinWheel from '@/components/SpinWheel';
 import InvoiceForm from '@/components/InvoiceForm';
-import { Gift, Sparkles, Trophy, RotateCcw, ChevronLeft, ChevronRight, History } from 'lucide-react';
+import { Gift, Sparkles, Trophy, RotateCcw, ChevronLeft, ChevronRight, History, TreePine } from 'lucide-react';
 
 interface Prize {
     id: string;
@@ -57,6 +57,15 @@ interface HistoryPagination {
     totalPages: number;
 }
 
+// Snowflake component
+function Snowflake({ style }: { style: React.CSSProperties }) {
+    return (
+        <div className="snowflake" style={style}>
+            ❄
+        </div>
+    );
+}
+
 export default function SpinPage() {
     const [event, setEvent] = useState<EventData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -73,6 +82,24 @@ export default function SpinPage() {
     const [history, setHistory] = useState<SpinHistoryItem[]>([]);
     const [historyPage, setHistoryPage] = useState(1);
     const [historyPagination, setHistoryPagination] = useState<HistoryPagination | null>(null);
+
+    // Snowflakes
+    const [snowflakes, setSnowflakes] = useState<{ id: number; style: React.CSSProperties }[]>([]);
+
+    useEffect(() => {
+        // Generate snowflakes
+        const flakes = Array.from({ length: 50 }, (_, i) => ({
+            id: i,
+            style: {
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 3 + 2}s`,
+                animationDelay: `${Math.random() * 2}s`,
+                fontSize: `${Math.random() * 10 + 10}px`,
+                opacity: Math.random() * 0.7 + 0.3,
+            },
+        }));
+        setSnowflakes(flakes);
+    }, []);
 
     // Fetch history
     const fetchHistory = useCallback(async () => {
@@ -190,7 +217,7 @@ export default function SpinPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-b from-red-900 via-red-800 to-green-900 flex items-center justify-center">
                 <div className="text-center text-white">
                     <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p>Đang tải...</p>
@@ -201,8 +228,8 @@ export default function SpinPage() {
 
     if (error || !event) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-4">
-                <div className="text-center text-white bg-white/10 backdrop-blur rounded-2xl p-8 max-w-md">
+            <div className="min-h-screen bg-gradient-to-b from-red-900 via-red-800 to-green-900 flex items-center justify-center p-4">
+                <div className="text-center text-white bg-white/10 backdrop-blur rounded-2xl p-8 max-w-md border border-white/20">
                     <Gift className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                     <h1 className="text-2xl font-bold mb-2">Chưa có sự kiện</h1>
                     <p className="text-white/70">{error || 'Hiện không có chương trình quay thưởng nào đang diễn ra.'}</p>
@@ -212,33 +239,55 @@ export default function SpinPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 py-8 px-4">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-b from-red-900 via-red-800 to-green-900 py-8 px-4 relative overflow-hidden">
+            {/* Snowfall */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                {snowflakes.map((flake) => (
+                    <Snowflake key={flake.id} style={flake.style} />
+                ))}
+            </div>
+
+            {/* Christmas trees decoration */}
+            <div className="fixed bottom-0 left-4 text-6xl opacity-30 z-0">🎄</div>
+            <div className="fixed bottom-0 right-4 text-6xl opacity-30 z-0">🎄</div>
+            <div className="fixed bottom-0 left-1/4 text-4xl opacity-20 z-0">🎄</div>
+            <div className="fixed bottom-0 right-1/4 text-4xl opacity-20 z-0">🎄</div>
+
+            <div className="max-w-4xl mx-auto relative z-10">
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                        <Sparkles className="w-8 h-8 text-yellow-400" />
-                        <h1 className="text-3xl md:text-4xl font-bold text-white">{event.name}</h1>
-                        <Sparkles className="w-8 h-8 text-yellow-400" />
+                <div className="text-center mb-6">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                        <TreePine className="w-6 h-6 text-green-400 hidden sm:block" />
+                        <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                            🎅 {event.name} 🎁
+                        </h1>
+                        <TreePine className="w-6 h-6 text-green-400 hidden sm:block" />
                     </div>
                     {event.description && (
-                        <p className="text-white/70">{event.description}</p>
+                        <p className="text-yellow-200/90 text-sm sm:text-base mt-1">{event.description}</p>
                     )}
+                    <div className="flex justify-center gap-1 sm:gap-2 mt-2">
+                        <span className="text-lg sm:text-2xl">❄️</span>
+                        <span className="text-lg sm:text-2xl">🎄</span>
+                        <span className="text-lg sm:text-2xl">⭐</span>
+                        <span className="text-lg sm:text-2xl">🎄</span>
+                        <span className="text-lg sm:text-2xl">❄️</span>
+                    </div>
                 </div>
 
                 {/* Invoice Form or Session Info */}
                 {!session ? (
-                    <div className="mb-8">
-                        <h2 className="text-center text-lg text-white/80 mb-4">
-                            Nhập mã hóa đơn để tham gia quay thưởng
-                        </h2>
+                    <div className="mb-6">
+                        <p className="text-center text-sm sm:text-base text-yellow-100 mb-3">
+                            🎁 Nhập mã hóa đơn để nhận quà 🎁
+                        </p>
                         <InvoiceForm onValidated={handleValidated} />
                     </div>
                 ) : (
                     <div className="mb-6 text-center">
-                        <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/10 backdrop-blur rounded-xl px-6 py-4">
+                        <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/10 backdrop-blur rounded-xl px-6 py-4 border border-yellow-400/30">
                             <div className="text-sm text-white/70">
-                                <span className="text-white font-semibold">{session.customer.name || 'Khách hàng'}</span>
+                                <span className="text-yellow-200 font-semibold">🎅 {session.customer.name || 'Khách hàng'}</span>
                             </div>
                             <div className="h-6 w-px bg-white/20 hidden sm:block" />
                             <div className="text-sm">
@@ -248,7 +297,7 @@ export default function SpinPage() {
                             <div className="h-6 w-px bg-white/20 hidden sm:block" />
                             <div className="text-sm">
                                 <span className="text-white/60">Giá trị:</span>{' '}
-                                <span className="text-green-400 font-semibold">
+                                <span className="text-green-300 font-semibold">
                                     {new Intl.NumberFormat('vi-VN').format(session.invoice_total)}đ
                                 </span>
                             </div>
@@ -258,8 +307,8 @@ export default function SpinPage() {
                                 <span className="text-white">{session.branch.name}</span>
                             </div>
                             <div className="h-6 w-px bg-white/20" />
-                            <div className="text-yellow-400 font-bold">
-                                {session.remaining_turns} lượt
+                            <div className="text-yellow-300 font-bold">
+                                🎁 {session.remaining_turns} lượt
                             </div>
                             <button
                                 onClick={handleNewInvoice}
@@ -273,34 +322,29 @@ export default function SpinPage() {
                 )}
 
                 {/* Spin Wheel */}
-                <div className="flex flex-col items-center gap-8">
-                    <SpinWheel
-                        prizes={event.prizes}
-                        isSpinning={isSpinning}
-                        targetIndex={targetIndex}
-                        onSpinComplete={handleSpinComplete}
-                    />
-
-                    {/* Spin Button */}
-                    {session && session.remaining_turns > 0 && !showResult && (
-                        <button
-                            onClick={handleSpin}
-                            disabled={isSpinning}
-                            className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-gray-900 font-bold text-xl rounded-full shadow-lg transform hover:scale-105 transition disabled:opacity-50 disabled:transform-none disabled:cursor-not-allowed"
-                        >
-                            {isSpinning ? 'Đang quay...' : 'QUAY NGAY!'}
-                        </button>
-                    )}
+                <div className="flex flex-col items-center gap-6">
+                    <div className="relative">
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-3xl scale-110" />
+                        <SpinWheel
+                            prizes={event.prizes}
+                            isSpinning={isSpinning}
+                            targetIndex={targetIndex}
+                            onSpinComplete={handleSpinComplete}
+                            canSpin={!!session && session.remaining_turns > 0 && !showResult}
+                            onSpin={handleSpin}
+                        />
+                    </div>
 
                     {/* No more turns */}
                     {session && session.remaining_turns === 0 && !showResult && (
                         <div className="text-center">
-                            <p className="text-white/70 mb-4">Bạn đã hết lượt quay cho hóa đơn này</p>
+                            <p className="text-yellow-100/70 mb-4">Bạn đã hết lượt quay cho hóa đơn này</p>
                             <button
                                 onClick={handleNewInvoice}
-                                className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl transition"
+                                className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl transition border border-white/30"
                             >
-                                Nhập hóa đơn khác
+                                🎁 Nhập hóa đơn khác
                             </button>
                         </div>
                     )}
@@ -310,23 +354,23 @@ export default function SpinPage() {
                 <div className="mt-12">
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <History className="w-5 h-5 text-yellow-400" />
-                        <h2 className="text-xl font-bold text-white">Lịch sử quay thưởng</h2>
+                        <h2 className="text-xl font-bold text-white">🎄 Lịch sử quay thưởng</h2>
                     </div>
-                    <div className="bg-white/10 backdrop-blur rounded-xl overflow-hidden">
+                    <div className="bg-white/10 backdrop-blur rounded-xl overflow-hidden border border-green-500/30">
                         <table className="w-full text-sm">
-                            <thead className="bg-white/10">
+                            <thead className="bg-green-900/50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-white/80 font-medium">Thời gian</th>
-                                    <th className="px-4 py-3 text-left text-white/80 font-medium hidden sm:table-cell">Chi nhánh</th>
-                                    <th className="px-4 py-3 text-left text-white/80 font-medium">Khách hàng</th>
-                                    <th className="px-4 py-3 text-left text-white/80 font-medium">Quà</th>
+                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Thời gian</th>
+                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium hidden sm:table-cell">Chi nhánh</th>
+                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Khách hàng</th>
+                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Quà 🎁</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/10">
                                 {history.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-4 py-8 text-center text-white/50">
-                                            Chưa có lượt quay nào
+                                            🎄 Chưa có lượt quay nào
                                         </td>
                                     </tr>
                                 ) : (
@@ -337,10 +381,10 @@ export default function SpinPage() {
                                             <td className="px-4 py-3 text-white">{item.customer_name || 'Khách'}</td>
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.prize_type === 'no_prize'
-                                                        ? 'bg-gray-500/30 text-gray-300'
-                                                        : 'bg-yellow-500/30 text-yellow-300'
+                                                    ? 'bg-gray-500/30 text-gray-300'
+                                                    : 'bg-red-500/30 text-yellow-200'
                                                     }`}>
-                                                    {item.prize_name}
+                                                    {item.prize_type === 'no_prize' ? '❄️' : '🎁'} {item.prize_name}
                                                 </span>
                                             </td>
                                         </tr>
@@ -374,26 +418,22 @@ export default function SpinPage() {
                     </div>
                 </div>
 
-                {/* Result Modal */}
+                {/* Result Modal - Bottom Sheet */}
                 {showResult && wonPrize && (
-                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                        <div className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-8 max-w-sm w-full text-center transform animate-bounce-in">
+                    <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+                        <div className="bg-gradient-to-b from-red-800 to-green-900 rounded-t-3xl p-6 max-w-md mx-auto text-center border-t-4 border-x-4 border-yellow-400 shadow-2xl">
                             {wonPrize.type === 'no_prize' ? (
                                 <>
-                                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
-                                        <Gift className="w-10 h-10 text-gray-400" />
-                                    </div>
+                                    <div className="text-6xl mb-4">❄️</div>
                                     <h3 className="text-2xl font-bold text-white mb-2">Chúc bạn may mắn lần sau!</h3>
-                                    <p className="text-white/70 mb-6">Hãy thử lại với hóa đơn khác nhé</p>
+                                    <p className="text-white/70 mb-6">🎄 Hãy thử lại với hóa đơn khác nhé 🎄</p>
                                 </>
                             ) : (
                                 <>
-                                    <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: wonPrize.color }}>
-                                        <Trophy className="w-10 h-10 text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-yellow-400 mb-2">🎉 Chúc mừng! 🎉</h3>
+                                    <div className="text-6xl mb-4">🎁</div>
+                                    <h3 className="text-xl font-bold text-yellow-300 mb-2">🎅 Chúc mừng Giáng sinh! 🎅</h3>
                                     <p className="text-2xl font-bold text-white mb-4">{wonPrize.name}</p>
-                                    <p className="text-white/70 mb-6">Vui lòng liên hệ nhân viên để nhận quà</p>
+                                    <p className="text-yellow-100/70 mb-6">🎄 Vui lòng liên hệ nhân viên để nhận quà 🎄</p>
                                 </>
                             )}
 
@@ -401,16 +441,16 @@ export default function SpinPage() {
                                 {session && session.remaining_turns > 0 ? (
                                     <button
                                         onClick={handlePlayAgain}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-xl hover:opacity-90 transition"
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition border-2 border-yellow-400"
                                     >
-                                        Quay tiếp ({session.remaining_turns} lượt)
+                                        🎁 Quay tiếp ({session.remaining_turns} lượt)
                                     </button>
                                 ) : (
                                     <button
                                         onClick={handleNewInvoice}
                                         className="flex-1 px-4 py-3 bg-white/20 text-white font-medium rounded-xl hover:bg-white/30 transition"
                                     >
-                                        Nhập hóa đơn khác
+                                        🎄 Nhập hóa đơn khác
                                     </button>
                                 )}
                             </div>
@@ -420,15 +460,33 @@ export default function SpinPage() {
             </div>
 
             <style jsx>{`
-        @keyframes bounce-in {
-          0% { transform: scale(0.5); opacity: 0; }
-          70% { transform: scale(1.05); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-bounce-in {
-          animation: bounce-in 0.5s ease-out;
-        }
-      `}</style>
+                @keyframes bounce-in {
+                    0% { transform: scale(0.5); opacity: 0; }
+                    70% { transform: scale(1.05); }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                .animate-bounce-in {
+                    animation: bounce-in 0.5s ease-out;
+                }
+                @keyframes slide-up {
+                    0% { transform: translateY(100%); opacity: 0; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+                .animate-slide-up {
+                    animation: slide-up 0.4s ease-out;
+                }
+                @keyframes snowfall {
+                    0% { transform: translateY(-10vh) rotate(0deg); }
+                    100% { transform: translateY(110vh) rotate(360deg); }
+                }
+                .snowflake {
+                    position: fixed;
+                    top: -10vh;
+                    color: white;
+                    animation: snowfall linear infinite;
+                    z-index: 1;
+                }
+            `}</style>
         </div>
     );
 }

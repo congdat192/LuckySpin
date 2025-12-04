@@ -43,7 +43,7 @@ export async function PUT(
 ) {
     try {
         const body = await request.json();
-        const { name, slug, description, start_date, end_date, status, prizes } = body;
+        const { name, slug, description, start_date, end_date, status, prizes, rules } = body;
 
         const supabase = createAdminClient();
 
@@ -125,6 +125,45 @@ export async function PUT(
                     });
                 }
             }
+        }
+
+        // Update rules if provided
+        if (rules) {
+            // Delete existing rules
+            await supabase.from('event_rules').delete().eq('event_id', params.id);
+
+            // Create eligibility rule
+            if (rules.min_invoice_total) {
+                await supabase.from('event_rules').insert({
+                    event_id: params.id,
+                    rule_type: 'eligibility',
+                    priority: 10,
+                    is_active: true,
+                    conditions: {
+                        min_invoice_total: parseInt(rules.min_invoice_total) || 0,
+                    },
+                });
+            }
+
+            // Create turn calculation rule
+            const formula = rules.turn_formula_type === 'fixed'
+                ? { type: 'fixed', value: parseInt(rules.fixed_turns) || 1 }
+                : {
+                    type: 'step',
+                    steps: (rules.steps || []).map((s: { min: string; max: string; turns: string }) => ({
+                        min: parseInt(s.min) || 0,
+                        max: s.max ? parseInt(s.max) : null,
+                        turns: parseInt(s.turns) || 1,
+                    })),
+                };
+
+            await supabase.from('event_rules').insert({
+                event_id: params.id,
+                rule_type: 'turn_calculation',
+                priority: 5,
+                is_active: true,
+                formula,
+            });
         }
 
         return NextResponse.json({ success: true, data: event });

@@ -142,17 +142,17 @@ export default function InvoiceForm({ onValidated, disabled }: InvoiceFormProps)
                                 </div>
                             </div>
                         </div>
-                    ) : result.remaining_turns === 0 ? (
+                    ) : !result.is_eligible ? (
                         <div className="text-orange-200">
-                            <p className="font-semibold mb-1">Hóa đơn đã sử dụng hết lượt quay</p>
-                            <p className="text-sm opacity-80">
-                                Đã quay {result.total_turns}/{result.total_turns} lượt
-                            </p>
+                            <p className="font-semibold mb-1">Hóa đơn không đủ điều kiện quay</p>
+                            <p className="text-sm opacity-80">{result.reason || 'Giá trị hóa đơn chưa đạt mức tối thiểu'}</p>
                         </div>
                     ) : (
                         <div className="text-orange-200">
-                            <p className="font-semibold mb-1">Hóa đơn không đủ điều kiện</p>
-                            <p className="text-sm opacity-80">{result.reason}</p>
+                            <p className="font-semibold mb-1">Hóa đơn đã sử dụng hết lượt quay</p>
+                            <p className="text-sm opacity-80">
+                                Đã quay {result.total_turns - result.remaining_turns}/{result.total_turns} lượt
+                            </p>
                         </div>
                     )}
                 </div>
