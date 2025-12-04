@@ -83,7 +83,7 @@ export async function PUT(
             const incomingPrizeIds = new Set(prizes.filter((p: { id?: string }) => p.id).map((p: { id: string }) => p.id));
 
             // Find prizes to delete (exist in DB but not in incoming)
-            const prizesToDelete = [...existingPrizeIds].filter(id => !incomingPrizeIds.has(id));
+            const prizesToDelete = Array.from(existingPrizeIds).filter(id => !incomingPrizeIds.has(id));
 
             // Delete related data for removed prizes only
             if (prizesToDelete.length > 0) {
