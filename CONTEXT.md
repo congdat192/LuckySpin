@@ -24,10 +24,10 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 ### Tables
 
 1. **events** - Sự kiện (Noel, Tết...)
-2. **branches** - Chi nhánh cửa hàng  
+2. **branches** - Chi nhánh cửa hàng (sync từ KiotViet)
 3. **event_rules** - Điều kiện tham gia + công thức tính lượt
 4. **event_prizes** - Danh sách quà của sự kiện
-5. **branch_prize_inventory** - Tồn kho quà theo chi nhánh
+5. **branch_prize_inventory** - Tồn kho quà theo chi nhánh + event
 6. **invoice_sessions** - Phiên hóa đơn đã validate
 7. **spin_logs** - Lịch sử quay thưởng
 
@@ -56,6 +56,7 @@ branches
 | `/api/event` | GET | Lấy sự kiện active + prizes |
 | `/api/invoice/validate` | POST | Xác thực hóa đơn với KiotViet |
 | `/api/spin` | POST | Thực hiện quay thưởng |
+| `/api/spin/history` | GET | Lịch sử quay (phân trang) |
 
 ### Admin APIs
 
@@ -66,6 +67,10 @@ branches
 | `/api/admin/events/[id]` | GET/PUT/DELETE | Single event |
 | `/api/admin/branches` | GET/POST | CRUD branches |
 | `/api/admin/branches/[id]` | GET/PUT/DELETE | Single branch |
+| `/api/admin/branches/sync` | POST | Sync từ KiotViet |
+| `/api/admin/inventory` | GET/POST | Quản lý tồn kho |
+| `/api/admin/reports` | GET | Báo cáo chi tiết |
+| `/api/admin/settings/kiotviet-status` | GET | Check KiotViet connection |
 
 ## Business Logic
 
@@ -76,15 +81,19 @@ branches
 3. Validate điều kiện (giá trị tối thiểu, chi nhánh...)
 4. Tính số lượt quay theo công thức (fixed hoặc step)
 5. Tạo session cho khách quay
+6. Trả về thông tin: tên KH, mã HD, giá trị HD, số lượt
 
 ### Spin Flow
 
-1. Client gọi `/api/spin` với session_id
+1. Client gọi `/api/spin` với session_id + turn_index
 2. Server kiểm tra session còn lượt không
-3. Weighted random chọn prize (có check inventory)
-4. Trừ inventory nếu trúng quà vật lý
-5. Ghi log + trả về kết quả
-6. Frontend animate vòng quay đến kết quả
+3. Lấy inventory theo branch_id + prize_id (qua event)
+4. Weighted random chọn prize (check quantity > 0)
+5. Trừ inventory nếu trúng quà thật
+6. Update used_turns trong session
+7. Ghi spin_log
+8. Frontend animate vòng quay đến kết quả
+9. Refresh lịch sử quay
 
 ### Turn Calculation
 
@@ -94,6 +103,16 @@ branches
 - 500K - 999K → 1 lượt
 - 1M - 1.9M → 2 lượt  
 - 2M+ → 3 lượt
+
+### KiotViet Integration
+
+**Invoice API**: Lấy thông tin hóa đơn bằng mã
+- Endpoint: `GET /invoices/code/{code}`
+- Response: customerName, total, branchId, products...
+
+**Branch Sync**: Đồng bộ chi nhánh từ KiotViet
+- Endpoint: `GET /branches`
+- Lưu vào DB với kiotviet_branch_id
 
 ## Security
 
@@ -111,16 +130,32 @@ npm run dev
 # Build
 npm run build
 
-# Type check
-npm run type-check
+# Lint
+npm run lint
 ```
 
 ## Deployment
 
 1. Push code lên GitHub
 2. Connect Vercel với repo
-3. Set environment variables trong Vercel
-4. Deploy
+3. Set environment variables trong Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `KIOTVIET_CLIENT_ID`
+   - `KIOTVIET_CLIENT_SECRET`
+   - `KIOTVIET_RETAILER`
+4. Deploy tự động khi push
+
+## Recent Updates (Dec 2024)
+
+- ✅ KiotViet branch sync với nút UI
+- ✅ Hiển thị thông tin khách hàng từ KiotViet
+- ✅ Fix inventory deduction khi quay
+- ✅ Dashboard với thống kê realtime
+- ✅ Reports với filter và pagination
+- ✅ Spin history công khai với phân trang
+- ✅ Format datetime theo timezone VN
 
 ## Next Steps (Roadmap)
 
