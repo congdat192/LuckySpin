@@ -149,7 +149,7 @@ export default function InventoryPage() {
             const response = await fetch('/api/admin/inventory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items }),
+                body: JSON.stringify({ items, event_id: selectedEventId }),
             });
             const data = await response.json();
             if (data.success) {

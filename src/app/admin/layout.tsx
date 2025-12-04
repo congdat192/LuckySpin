@@ -13,7 +13,7 @@ import {
     Menu,
     X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -27,10 +27,23 @@ const navigation = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [username, setUsername] = useState('');
+
+    useEffect(() => {
+        const cookies = document.cookie.split(';');
+        const userCookie = cookies.find(c => c.trim().startsWith('admin_user='));
+        if (userCookie) {
+            setUsername(userCookie.split('=')[1] || '');
+        }
+    }, []);
+
+    const handleLogout = async () => {
+        await fetch('/api/admin/auth', { method: 'DELETE' });
+        window.location.href = '/login';
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
-            {/* Mobile sidebar backdrop */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -38,11 +51,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 />
             )}
 
-            {/* Sidebar */}
             <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-gray-900 transform transition-transform lg:translate-x-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+                fixed top-0 left-0 z-50 h-full w-64 bg-gray-900 transform transition-transform lg:translate-x-0
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
                 <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
                     <Link href="/admin" className="flex items-center gap-2">
                         <Gift className="w-8 h-8 text-yellow-400" />
@@ -66,12 +78,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 key={item.name}
                                 href={item.href}
                                 className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition
-                  ${isActive
+                                    flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition
+                                    ${isActive
                                         ? 'bg-yellow-400 text-gray-900'
                                         : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                                     }
-                `}
+                                `}
                             >
                                 <item.icon className="w-5 h-5" />
                                 {item.name}
@@ -82,10 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
                     <button
-                        onClick={async () => {
-                            await fetch('/api/admin/auth', { method: 'DELETE' });
-                            window.location.href = '/admin/login';
-                        }}
+                        onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition"
                     >
                         <LogOut className="w-5 h-5" />
@@ -94,9 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </aside>
 
-            {/* Main content */}
             <div className="lg:pl-64">
-                {/* Top bar */}
                 <header className="sticky top-0 z-30 bg-white border-b border-gray-200 h-16 flex items-center px-4 lg:px-8">
                     <button
                         onClick={() => setSidebarOpen(true)}
@@ -116,15 +123,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             Xem trang quay →
                         </Link>
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium">
-                                A
+                            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium text-white uppercase">
+                                {username.charAt(0) || 'A'}
                             </div>
-                            <span className="text-sm font-medium text-gray-700 hidden sm:block">Admin</span>
+                            <span className="text-sm font-medium text-gray-700 hidden sm:block capitalize">{username || 'Admin'}</span>
                         </div>
                     </div>
                 </header>
 
-                {/* Page content */}
                 <main className="p-4 lg:p-8">
                     {children}
                 </main>

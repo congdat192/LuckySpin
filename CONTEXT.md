@@ -31,22 +31,6 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 6. **invoice_sessions** - Phiên hóa đơn đã validate
 7. **spin_logs** - Lịch sử quay thưởng
 
-### Relationships
-
-```
-events
-  ├── event_rules (1:n)
-  ├── event_prizes (1:n)
-  │     └── branch_prize_inventory (1:n per branch)
-  ├── invoice_sessions (1:n)
-  └── spin_logs (1:n)
-
-branches
-  ├── branch_prize_inventory (1:n)
-  ├── invoice_sessions (1:n)
-  └── spin_logs (1:n)
-```
-
 ## API Endpoints
 
 ### Public APIs
@@ -58,10 +42,11 @@ branches
 | `/api/spin` | POST | Thực hiện quay thưởng |
 | `/api/spin/history` | GET | Lịch sử quay (phân trang) |
 
-### Admin APIs
+### Admin APIs (Yêu cầu đăng nhập)
 
 | Endpoint | Method | Mô tả |
 |----------|--------|-------|
+| `/api/admin/auth` | POST/DELETE | Login/Logout |
 | `/api/admin/dashboard` | GET | Stats dashboard |
 | `/api/admin/events` | GET/POST | CRUD events |
 | `/api/admin/events/[id]` | GET/PUT/DELETE | Single event |
@@ -70,97 +55,76 @@ branches
 | `/api/admin/branches/sync` | POST | Sync từ KiotViet |
 | `/api/admin/inventory` | GET/POST | Quản lý tồn kho |
 | `/api/admin/reports` | GET | Báo cáo chi tiết |
-| `/api/admin/settings/kiotviet-status` | GET | Check KiotViet connection |
+
+## Authentication
+
+- **Middleware**: Bảo vệ tất cả routes `/admin/*`
+- **Multi-user**: Cấu hình qua `ADMIN_USERS` env (format: `user1:pass1,user2:pass2`)
+- **Session**: Cookie-based, expire sau 7 ngày
+- **Login page**: `/login`
 
 ## Business Logic
 
 ### Invoice Validation Flow
 
-1. Staff nhập mã hóa đơn
+1. Khách nhập mã hóa đơn
 2. API gọi KiotViet để lấy thông tin HD
-3. Validate điều kiện (giá trị tối thiểu, chi nhánh...)
-4. Tính số lượt quay theo công thức (fixed hoặc step)
-5. Tạo session cho khách quay
-6. Trả về thông tin: tên KH, mã HD, giá trị HD, số lượt
+3. Kiểm tra ngày HD trong thời gian sự kiện
+4. Validate điều kiện (giá trị tối thiểu, chi nhánh...)
+5. Tính số lượt quay theo công thức (fixed hoặc step)
+6. Tạo session với thông tin: tên KH, mã HD, giá trị, số lượt
 
 ### Spin Flow
 
 1. Client gọi `/api/spin` với session_id + turn_index
-2. Server kiểm tra session còn lượt không
-3. Lấy inventory theo branch_id + prize_id (qua event)
+2. Server kiểm tra session còn lượt
+3. Lấy inventory theo branch_id + prize_id
 4. Weighted random chọn prize (check quantity > 0)
 5. Trừ inventory nếu trúng quà thật
-6. Update used_turns trong session
-7. Ghi spin_log
-8. Frontend animate vòng quay đến kết quả
-9. Refresh lịch sử quay
+6. Update used_turns, ghi spin_log
+7. Frontend animate vòng quay
+8. Refresh lịch sử quay
 
-### Turn Calculation
+### Event Update Logic
 
-**Fixed**: Mỗi HD = N lượt (VD: 1 lượt/HD)
-
-**Step (bậc thang)**:
-- 500K - 999K → 1 lượt
-- 1M - 1.9M → 2 lượt  
-- 2M+ → 3 lượt
-
-### KiotViet Integration
-
-**Invoice API**: Lấy thông tin hóa đơn bằng mã
-- Endpoint: `GET /invoices/code/{code}`
-- Response: customerName, total, branchId, products...
-
-**Branch Sync**: Đồng bộ chi nhánh từ KiotViet
-- Endpoint: `GET /branches`
-- Lưu vào DB với kiotviet_branch_id
+- **Đổi tên/thông tin event**: Giữ nguyên prizes và inventory
+- **Sửa prize**: Update prize hiện có theo ID
+- **Thêm prize mới**: Insert với ID mới
+- **Xóa prize**: Xóa kèm inventory và spin_logs liên quan
 
 ## Security
 
-- **RLS**: Row Level Security cho tất cả tables
-- **Service Role**: Admin APIs dùng service role key (bypass RLS)
-- **Environment Variables**: Credentials không commit vào git
+- **Middleware Auth**: Cookie-based cho admin routes
+- **RLS**: Row Level Security trong Supabase
+- **Service Role**: Admin APIs dùng service role key
 - **Server-side random**: Không thể cheat từ client
 
 ## Development
 
 ```bash
-# Dev server
-npm run dev
-
-# Build
-npm run build
-
-# Lint
-npm run lint
+npm run dev    # Dev server
+npm run build  # Build production
+npm run lint   # Lint check
 ```
 
-## Deployment
+## Deployment (Vercel)
 
-1. Push code lên GitHub
-2. Connect Vercel với repo
-3. Set environment variables trong Vercel:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `KIOTVIET_CLIENT_ID`
-   - `KIOTVIET_CLIENT_SECRET`
-   - `KIOTVIET_RETAILER`
-4. Deploy tự động khi push
+Environment Variables cần set:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `KIOTVIET_CLIENT_ID`
+- `KIOTVIET_CLIENT_SECRET`
+- `KIOTVIET_RETAILER`
+- `ADMIN_USERS`
 
 ## Recent Updates (Dec 2024)
 
-- ✅ KiotViet branch sync với nút UI
-- ✅ Hiển thị thông tin khách hàng từ KiotViet
-- ✅ Fix inventory deduction khi quay
-- ✅ Dashboard với thống kê realtime
-- ✅ Reports với filter và pagination
-- ✅ Spin history công khai với phân trang
-- ✅ Format datetime theo timezone VN
-
-## Next Steps (Roadmap)
-
-- [ ] Authentication cho Admin Panel
-- [ ] Export Excel reports
-- [ ] Real-time inventory sync
-- [ ] QR code scan hóa đơn
-- [ ] SMS notification khi trúng thưởng
+- ✅ Admin authentication với multi-user
+- ✅ Invoice date validation (trong thời gian event)
+- ✅ Preserve prize IDs khi update event
+- ✅ Fix inventory save với event_id
+- ✅ Fix FK constraints khi delete prizes
+- ✅ Spin history với phân trang
+- ✅ Dashboard với stats realtime
+- ✅ Branch sync từ KiotViet

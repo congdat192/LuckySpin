@@ -72,31 +72,58 @@ export async function PUT(
         }
 
         // Update prizes if provided
-        if (prizes !== undefined) {
-            // Delete existing prizes
-            await supabase.from('event_prizes').delete().eq('event_id', params.id);
+        if (prizes !== undefined && Array.isArray(prizes)) {
+            // Get existing prizes
+            const { data: existingPrizes } = await supabase
+                .from('event_prizes')
+                .select('id')
+                .eq('event_id', params.id);
 
-            // Insert new prizes
-            if (prizes.length > 0) {
-                const prizesToInsert = prizes.map((p: {
+            const existingPrizeIds = new Set((existingPrizes || []).map(p => p.id));
+            const incomingPrizeIds = new Set(prizes.filter((p: { id?: string }) => p.id).map((p: { id: string }) => p.id));
+
+            // Find prizes to delete (exist in DB but not in incoming)
+            const prizesToDelete = [...existingPrizeIds].filter(id => !incomingPrizeIds.has(id));
+
+            // Delete related data for removed prizes only
+            if (prizesToDelete.length > 0) {
+                await supabase.from('spin_logs').delete().in('prize_won', prizesToDelete);
+                await supabase.from('branch_prize_inventory').delete().in('prize_id', prizesToDelete);
+                await supabase.from('event_prizes').delete().in('id', prizesToDelete);
+            }
+
+            // Update or insert prizes
+            for (let idx = 0; idx < prizes.length; idx++) {
+                const p = prizes[idx] as {
+                    id?: string;
                     name: string;
                     prize_type: string;
-                    value: string;
-                    description: string;
-                    default_weight: string;
+                    value?: string;
+                    description?: string;
+                    default_weight?: string;
                     color: string;
-                }, idx: number) => ({
-                    event_id: params.id,
+                };
+
+                const prizeData = {
                     name: p.name,
                     prize_type: p.prize_type,
                     value: p.value ? parseFloat(p.value) : null,
                     description: p.description || null,
-                    default_weight: parseInt(p.default_weight) || 10,
+                    default_weight: parseInt(p.default_weight || '10') || 10,
                     color: p.color,
                     display_order: idx,
-                }));
+                };
 
-                await supabase.from('event_prizes').insert(prizesToInsert);
+                if (p.id && existingPrizeIds.has(p.id)) {
+                    // Update existing prize
+                    await supabase.from('event_prizes').update(prizeData).eq('id', p.id);
+                } else {
+                    // Insert new prize
+                    await supabase.from('event_prizes').insert({
+                        ...prizeData,
+                        event_id: params.id,
+                    });
+                }
             }
         }
 

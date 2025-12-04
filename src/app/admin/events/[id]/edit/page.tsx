@@ -161,6 +161,7 @@ export default function EditEventPage() {
                     end_date: endDate,
                     status,
                     prizes: prizes.map(p => ({
+                        id: p.id, // Preserve prize ID
                         name: p.name,
                         prize_type: p.prize_type,
                         value: p.value,
