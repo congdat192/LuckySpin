@@ -90,6 +90,23 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Check invoice date is within event date range
+        const invoiceDate = new Date(invoice.purchaseDate);
+        const eventStart = new Date(event.start_date);
+        const eventEnd = new Date(event.end_date);
+
+        if (invoiceDate < eventStart || invoiceDate > eventEnd) {
+            const formatDate = (d: Date) => d.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            return NextResponse.json({
+                success: false,
+                error: `Hóa đơn phát sinh ngày ${formatDate(invoiceDate)} không nằm trong thời gian chương trình (${formatDate(eventStart)} - ${formatDate(eventEnd)})`
+            }, { status: 400 });
+        }
+
         // Find branch by KiotViet branch ID
         const { data: branch } = await supabase
             .from('branches')
