@@ -78,26 +78,32 @@ export default function InvoiceForm({ onValidated, disabled }: InvoiceFormProps)
     };
 
     return (
-        <div className="w-full max-w-md mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="w-full max-w-sm mx-auto">
+            <form onSubmit={handleSubmit}>
                 <div className="relative">
                     <input
                         type="text"
                         value={invoiceCode}
                         onChange={(e) => setInvoiceCode(e.target.value.toUpperCase())}
-                        placeholder="Nhập mã hóa đơn (VD: HD001234)"
+                        placeholder="Nhập mã hóa đơn"
                         disabled={disabled || loading}
-                        className="w-full px-4 py-3 pr-12 text-lg font-mono bg-white/10 backdrop-blur border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 disabled:opacity-50"
+                        className="w-full px-4 py-3 pr-28 text-base font-mono bg-white/10 backdrop-blur border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 disabled:opacity-50"
                     />
                     <button
                         type="submit"
                         disabled={disabled || loading}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg text-gray-900 transition disabled:opacity-50"
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 rounded-lg text-gray-900 font-semibold text-sm transition disabled:opacity-50 flex items-center gap-1.5"
                     >
                         {loading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Đang tra...</span>
+                            </>
                         ) : (
-                            <Search className="w-5 h-5" />
+                            <>
+                                <Search className="w-4 h-4" />
+                                <span>Tra cứu</span>
+                            </>
                         )}
                     </button>
                 </div>

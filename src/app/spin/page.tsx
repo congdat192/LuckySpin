@@ -284,8 +284,19 @@ export default function SpinPage() {
                         <InvoiceForm onValidated={handleValidated} />
                     </div>
                 ) : (
-                    <div className="mb-6 text-center">
-                        <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/10 backdrop-blur rounded-xl px-6 py-4 border border-yellow-400/30">
+                    <div className="mb-6">
+                        {/* Tra cứu lại button */}
+                        <div className="flex justify-end mb-2">
+                            <button
+                                onClick={handleNewInvoice}
+                                className="text-white/70 hover:text-white text-xs flex items-center gap-1 transition"
+                            >
+                                <RotateCcw className="w-3 h-3" />
+                                <span>Tra cứu lại</span>
+                            </button>
+                        </div>
+                        {/* Customer info card */}
+                        <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/10 backdrop-blur rounded-xl px-6 py-4 border border-yellow-400/30 w-full">
                             <div className="text-sm text-white/70">
                                 <span className="text-yellow-200 font-semibold">🎅 {session.customer.name || 'Khách hàng'}</span>
                             </div>
@@ -310,13 +321,6 @@ export default function SpinPage() {
                             <div className="text-yellow-300 font-bold">
                                 🎁 {session.remaining_turns} lượt
                             </div>
-                            <button
-                                onClick={handleNewInvoice}
-                                className="text-white/70 hover:text-white p-1"
-                                title="Đổi hóa đơn"
-                            >
-                                <RotateCcw className="w-4 h-4" />
-                            </button>
                         </div>
                     </div>
                 )}

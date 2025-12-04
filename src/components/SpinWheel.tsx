@@ -148,19 +148,19 @@ export default function SpinWheel({
     }, [isSpinning, targetIndex, segmentAngle, onSpinComplete]);
 
     return (
-        <div className="relative">
+        <div className="relative mx-4 sm:mx-0">
             {/* Pointer */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-                <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg" />
+                <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] sm:border-l-[15px] sm:border-r-[15px] sm:border-t-[30px] border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg" />
             </div>
 
             {/* Wheel */}
-            <div className="relative bg-gradient-to-b from-red-900 to-green-900 rounded-full p-4 shadow-2xl">
+            <div className="relative bg-gradient-to-b from-red-900 to-green-900 rounded-full p-3 sm:p-4 shadow-2xl">
                 <canvas
                     ref={canvasRef}
                     width={400}
                     height={400}
-                    className="block"
+                    className="block w-full max-w-[320px] sm:max-w-[400px] h-auto mx-auto"
                 />
 
                 {/* Center button */}
