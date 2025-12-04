@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎰 Lucky Spin - Vòng Quay May Mắn
 
-## Getting Started
+Hệ thống vòng quay may mắn đa sự kiện, tích hợp KiotViet API cho chuỗi cửa hàng.
 
-First, run the development server:
+## ✨ Tính năng
+
+- 🎯 **Multi-event**: Hỗ trợ nhiều sự kiện (Noel, Tết, Khai trương...)
+- 🏪 **Multi-branch**: 9 chi nhánh với inventory riêng
+- 🎁 **Flexible prizes**: Voucher, quà vật lý, giảm giá
+- 📊 **Admin Panel**: Dashboard, quản lý events, inventory, reports
+- 🔗 **KiotViet API**: Xác thực hóa đơn realtime
+- 🎲 **Server-side random**: Weighted random đảm bảo công bằng
+
+## 🚀 Quick Start
+
+### 1. Cài đặt
+
+```bash
+cd lucky-spin
+npm install
+```
+
+### 2. Cấu hình môi trường
+
+Copy `.env.local.example` → `.env.local` và điền thông tin:
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
+SUPABASE_SERVICE_ROLE_KEY=xxx
+
+# KiotViet
+KIOTVIET_CLIENT_ID=xxx
+KIOTVIET_CLIENT_SECRET=xxx
+KIOTVIET_RETAILER=tencuahang
+```
+
+### 3. Setup Database
+
+Chạy file `supabase/schema.sql` trong Supabase SQL Editor.
+
+### 4. Khởi động
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Truy cập: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Cấu trúc
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+lucky-spin/
+├── src/
+│   ├── app/
+│   │   ├── api/           # API routes
+│   │   ├── admin/         # Admin Panel
+│   │   ├── spin/          # Trang quay
+│   │   └── page.tsx       # Landing page
+│   ├── components/        # UI components
+│   ├── lib/               # Utils, Supabase, KiotViet
+│   └── types/             # TypeScript types
+└── supabase/
+    └── schema.sql         # Database schema
+```
 
-## Learn More
+## 🔑 Các trang chính
 
-To learn more about Next.js, take a look at the following resources:
+| URL | Mô tả |
+|-----|-------|
+| `/` | Landing page |
+| `/spin` | Trang quay thưởng cho khách |
+| `/admin` | Dashboard admin |
+| `/admin/events` | Quản lý sự kiện |
+| `/admin/branches` | Quản lý chi nhánh |
+| `/admin/inventory` | Quản lý tồn kho |
+| `/admin/reports` | Báo cáo & thống kê |
+| `/admin/settings` | Cài đặt KiotViet |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠 Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Supabase
+- **Database**: PostgreSQL (Supabase)
+- **External API**: KiotViet
 
-## Deploy on Vercel
+## 📝 License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
