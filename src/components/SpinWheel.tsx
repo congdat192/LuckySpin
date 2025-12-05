@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Prize {
     id: string;
@@ -30,8 +30,42 @@ export default function SpinWheel({
     const [currentRotation, setCurrentRotation] = useState(0);
     const [showTooltip, setShowTooltip] = useState(false);
     const animationRef = useRef<number | null>(null);
+    const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
     const segmentAngle = 360 / prizes.length;
+
+    // Load prize images
+    useEffect(() => {
+        const imageMap = new Map<string, HTMLImageElement>();
+        let loadedCount = 0;
+        const imagesToLoad = prizes.filter(p => p.image_url).length;
+
+        if (imagesToLoad === 0) {
+            setLoadedImages(new Map());
+            return;
+        }
+
+        prizes.forEach(prize => {
+            if (prize.image_url) {
+                const img = new window.Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    imageMap.set(prize.id, img);
+                    loadedCount++;
+                    if (loadedCount === imagesToLoad) {
+                        setLoadedImages(new Map(imageMap));
+                    }
+                };
+                img.onerror = () => {
+                    loadedCount++;
+                    if (loadedCount === imagesToLoad) {
+                        setLoadedImages(new Map(imageMap));
+                    }
+                };
+                img.src = prize.image_url;
+            }
+        });
+    }, [prizes]);
 
     // Draw wheel
     useEffect(() => {
@@ -76,6 +110,26 @@ export default function SpinWheel({
             ctx.lineWidth = 2;
             ctx.stroke();
 
+            // Draw image if available
+            const prizeImage = loadedImages.get(prize.id);
+            if (prizeImage) {
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + (segmentAngle / 2) * (Math.PI / 180));
+
+                // Draw image at center of segment
+                const imgSize = 30;
+                const imgX = radius * 0.6 - imgSize / 2;
+                const imgY = -imgSize / 2;
+
+                // Clip to circle
+                ctx.beginPath();
+                ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(prizeImage, imgX, imgY, imgSize, imgSize);
+                ctx.restore();
+            }
+
             // Text
             ctx.save();
             ctx.translate(centerX, centerY);
@@ -86,9 +140,10 @@ export default function SpinWheel({
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 3;
 
-            // Truncate long text
+            // Truncate long text - adjust position if image exists
             const text = prize.name.length > 15 ? prize.name.slice(0, 12) + '...' : prize.name;
-            ctx.fillText(text, radius - 20, 5);
+            const textX = prizeImage ? radius - 50 : radius - 20;
+            ctx.fillText(text, textX, 5);
             ctx.restore();
         });
 
@@ -108,7 +163,7 @@ export default function SpinWheel({
         ctx.fillText('QUAY', centerX, centerY - 5);
         ctx.fillText('NGAY', centerX, centerY + 12);
 
-    }, [prizes, currentRotation, segmentAngle]);
+    }, [prizes, currentRotation, segmentAngle, loadedImages]);
 
     // Spin animation
     useEffect(() => {

@@ -280,6 +280,10 @@ export default function SpinPage() {
         setWonPrize(null);
         setTargetIndex(null);
         setCurrentTurn(0);
+        // Reset voucher states to prevent email being sent to wrong voucher
+        setVoucherInfo(null);
+        setVoucherEmail('');
+        setEmailSent(false);
     };
 
     const formatDateTime = (dateStr: string) => {

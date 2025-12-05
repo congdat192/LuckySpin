@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, ImagePlus, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface PrizeInput {
     id: string;
@@ -14,6 +15,7 @@ interface PrizeInput {
     default_weight: string;
     color: string;
     voucher_campaign_id: string;
+    image_url: string;
 }
 
 interface VoucherCampaign {
@@ -61,6 +63,8 @@ export default function EditEventPage() {
 
     // Prizes
     const [prizes, setPrizes] = useState<PrizeInput[]>([]);
+    const [uploadingPrizeId, setUploadingPrizeId] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Voucher Campaigns
     const [voucherCampaigns, setVoucherCampaigns] = useState<VoucherCampaign[]>([]);
@@ -96,7 +100,7 @@ export default function EditEventPage() {
 
                     // Load prizes
                     if (event.event_prizes && event.event_prizes.length > 0) {
-                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string; voucher_campaign_id?: string }) => ({
+                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string; voucher_campaign_id?: string; image_url?: string }) => ({
                             id: p.id,
                             name: p.name || '',
                             prize_type: p.prize_type || 'voucher',
@@ -105,6 +109,7 @@ export default function EditEventPage() {
                             default_weight: String(p.default_weight || 0),
                             color: p.color || '#3B82F6',
                             voucher_campaign_id: p.voucher_campaign_id || '',
+                            image_url: p.image_url || '',
                         })));
                     }
 
@@ -139,6 +144,7 @@ export default function EditEventPage() {
                 default_weight: '10',
                 color: defaultColors[colorIndex],
                 voucher_campaign_id: '',
+                image_url: '',
             },
         ]);
     };
@@ -163,6 +169,34 @@ export default function EditEventPage() {
             ...rules,
             steps: rules.steps.filter((_, i) => i !== idx),
         });
+    };
+
+    const handleImageUpload = async (prizeId: string, file: File) => {
+        setUploadingPrizeId(prizeId);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                updatePrize(prizeId, 'image_url', data.data.url);
+            } else {
+                alert(data.error || 'Lỗi upload ảnh');
+            }
+        } catch {
+            alert('Đã xảy ra lỗi khi upload ảnh');
+        } finally {
+            setUploadingPrizeId(null);
+        }
+    };
+
+    const removeImage = (prizeId: string) => {
+        updatePrize(prizeId, 'image_url', '');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -195,6 +229,7 @@ export default function EditEventPage() {
                         default_weight: p.default_weight,
                         color: p.color,
                         voucher_campaign_id: p.voucher_campaign_id || null,
+                        image_url: p.image_url || null,
                     })),
                 }),
             });
@@ -458,7 +493,8 @@ export default function EditEventPage() {
                     </div>
 
                     {/* Column Headers */}
-                    <div className="grid grid-cols-[40px_160px_110px_1fr_90px_40px] gap-2 px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-200 mb-2">
+                    <div className="grid grid-cols-[50px_40px_140px_100px_1fr_80px_40px] gap-2 px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-200 mb-2">
+                        <div>Ảnh</div>
                         <div></div>
                         <div>Tên quà</div>
                         <div>Loại</div>
@@ -471,8 +507,48 @@ export default function EditEventPage() {
                         {prizes.map((prize) => (
                             <div
                                 key={prize.id}
-                                className="grid grid-cols-[40px_160px_110px_1fr_90px_40px] gap-2 items-center p-2 bg-gray-50 rounded-lg"
+                                className="grid grid-cols-[50px_40px_140px_100px_1fr_80px_40px] gap-2 items-center p-2 bg-gray-50 rounded-lg"
                             >
+                                {/* Image Upload */}
+                                <div className="relative">
+                                    {prize.image_url ? (
+                                        <div className="relative w-10 h-10 group">
+                                            <Image
+                                                src={prize.image_url}
+                                                alt={prize.name}
+                                                width={40}
+                                                height={40}
+                                                className="w-10 h-10 object-cover rounded-lg border border-gray-300"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(prize.id)}
+                                                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="w-10 h-10 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
+                                            {uploadingPrizeId === prize.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                                            ) : (
+                                                <ImagePlus className="w-4 h-4 text-gray-400" />
+                                            )}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) handleImageUpload(prize.id, file);
+                                                }}
+                                                disabled={uploadingPrizeId === prize.id}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+
                                 <input
                                     type="color"
                                     value={prize.color}

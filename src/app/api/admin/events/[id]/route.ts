@@ -103,6 +103,7 @@ export async function PUT(
                     default_weight?: string;
                     color: string;
                     voucher_campaign_id?: string | null;
+                    image_url?: string | null;
                 };
 
                 const prizeData = {
@@ -114,6 +115,7 @@ export async function PUT(
                     color: p.color,
                     display_order: idx,
                     voucher_campaign_id: p.voucher_campaign_id || null,
+                    image_url: p.image_url || null,
                 };
 
                 if (p.id && existingPrizeIds.has(p.id)) {
