@@ -28,6 +28,7 @@ export default function SpinWheel({
 }: SpinWheelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [currentRotation, setCurrentRotation] = useState(0);
+    const [showTooltip, setShowTooltip] = useState(false);
     const animationRef = useRef<number | null>(null);
 
     const segmentAngle = 360 / prizes.length;
@@ -52,14 +53,26 @@ export default function SpinWheel({
             const startAngle = (index * segmentAngle - 90 + currentRotation) * (Math.PI / 180);
             const endAngle = ((index + 1) * segmentAngle - 90 + currentRotation) * (Math.PI / 180);
 
-            // Segment
+            // Segment - use Christmas colors instead of prize.color
+            const christmasColors = [
+                '#c41e3a', // Christmas red
+                '#165b33', // Christmas green  
+                '#bb2528', // Candy red
+                '#146b3a', // Holly green
+                '#d4af37', // Gold
+                '#8b0000', // Dark red
+                '#228b22', // Forest green
+                '#b8860b', // Dark gold
+            ];
+            const segmentColor = christmasColors[index % christmasColors.length];
+
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.closePath();
-            ctx.fillStyle = prize.color;
+            ctx.fillStyle = segmentColor;
             ctx.fill();
-            ctx.strokeStyle = '#ffffff';
+            ctx.strokeStyle = '#ffd700';
             ctx.lineWidth = 2;
             ctx.stroke();
 
@@ -116,7 +129,7 @@ export default function SpinWheel({
             360 * 5 + // 5 full rotations for suspense
             (360 - targetSegmentAngle); // Land exactly on center of prize
 
-        const duration = 5000; // 5 seconds
+        const duration = 8000; // 8 seconds
         const startTime = Date.now();
 
         const animate = () => {
@@ -150,59 +163,90 @@ export default function SpinWheel({
     return (
         <div className="relative mx-4 sm:mx-0">
             {/* Pointer */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-                <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] sm:border-l-[15px] sm:border-r-[15px] sm:border-t-[30px] border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+                {/* Star on top */}
+                <div className="text-yellow-400 text-xl sm:text-2xl drop-shadow-lg -mb-2" style={{ textShadow: '0 0 10px #ffd700' }}>⭐</div>
+                {/* Triangle pointer */}
+                <div className="relative">
+                    <div className="w-0 h-0 border-l-[14px] border-r-[14px] border-t-[32px] sm:border-l-[18px] sm:border-r-[18px] sm:border-t-[40px] border-l-transparent border-r-transparent border-t-red-600"
+                        style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} />
+                    {/* Inner triangle for depth */}
+                    <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[18px] sm:border-l-[10px] sm:border-r-[10px] sm:border-t-[24px] border-l-transparent border-r-transparent border-t-red-500" />
+                </div>
             </div>
 
             {/* Wheel */}
-            <div className="relative bg-gradient-to-b from-red-900 to-green-900 rounded-full p-3 sm:p-4 shadow-2xl">
+            <div className="relative bg-gradient-to-br from-[#1a0a0a] via-[#0d1a0d] to-[#1a0a0a] rounded-full p-3 sm:p-4 shadow-2xl">
+                {/* Glow behind wheel */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/20 via-yellow-500/10 to-green-500/20 blur-xl scale-105" />
+
                 <canvas
                     ref={canvasRef}
                     width={400}
                     height={400}
-                    className="block w-full max-w-[320px] sm:max-w-[400px] h-auto mx-auto"
+                    className="block w-full max-w-[320px] sm:max-w-[400px] h-auto mx-auto relative z-10"
                 />
 
                 {/* Center button */}
-                <button
-                    onClick={onSpin}
-                    disabled={!canSpin || isSpinning}
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                        w-24 h-24 rounded-full font-bold text-sm
-                        flex items-center justify-center text-center
-                        transition-all duration-300 z-20
-                        bg-gradient-to-b from-red-500 to-red-700 text-white border-4 border-yellow-400
-                        ${canSpin && !isSpinning
-                            ? 'shadow-lg shadow-yellow-400/50 animate-pulse-glow cursor-pointer hover:scale-105'
-                            : isSpinning
-                                ? 'opacity-80 cursor-wait'
-                                : 'opacity-60 cursor-default'
-                        }`}
-                >
-                    {isSpinning ? (
-                        <span className="animate-spin text-2xl">🎄</span>
-                    ) : (
-                        <span className="whitespace-pre-line leading-tight">QUAY{'\n'}NGAY</span>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                    {/* Tooltip */}
+                    {showTooltip && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg animate-fade-in">
+                            Nhập mã hóa đơn để tra cứu lượt quay
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                        </div>
                     )}
-                </button>
+                    <button
+                        onClick={() => {
+                            if (canSpin && !isSpinning && onSpin) {
+                                onSpin();
+                            } else if (!canSpin && !isSpinning) {
+                                setShowTooltip(true);
+                                setTimeout(() => setShowTooltip(false), 2000);
+                            }
+                        }}
+                        className={`w-24 h-24 rounded-full font-bold text-sm
+                            flex items-center justify-center text-center
+                            transition-all duration-300
+                            bg-gradient-to-b from-red-600 to-red-800 text-white border-4 border-yellow-400 shadow-lg
+                            ${canSpin && !isSpinning
+                                ? 'shadow-yellow-400/50 animate-pulse-glow cursor-pointer hover:scale-105'
+                                : isSpinning
+                                    ? 'cursor-wait opacity-80'
+                                    : 'cursor-pointer'
+                            }`}
+                    >
+                        {isSpinning ? (
+                            <span className="animate-spin text-2xl">🎄</span>
+                        ) : (
+                            <span className="whitespace-pre-line leading-tight">QUAY{'\n'}NGAY</span>
+                        )}
+                    </button>
+                </div>
 
                 {/* Outer ring decoration - gold */}
-                <div className="absolute inset-0 rounded-full border-8 border-yellow-400 pointer-events-none shadow-lg shadow-yellow-400/30" />
-                <div className="absolute inset-2 rounded-full border-4 border-yellow-600/50 pointer-events-none" />
+                <div className="absolute inset-0 rounded-full border-[6px] sm:border-8 border-yellow-500 pointer-events-none shadow-[0_0_30px_rgba(234,179,8,0.4)] z-10" />
+                <div className="absolute inset-2 rounded-full border-2 sm:border-4 border-yellow-600/40 pointer-events-none z-10" />
             </div>
 
             {/* Christmas lights around the wheel */}
             <div className="absolute inset-0 pointer-events-none">
-                {Array.from({ length: 16 }).map((_, i) => (
+                {Array.from({ length: 20 }).map((_, i) => (
                     <div
                         key={i}
-                        className={`absolute w-3 h-3 rounded-full animate-pulse ${i % 2 === 0 ? 'bg-red-500' : 'bg-green-500'}`}
+                        className={`absolute w-2 sm:w-3 h-2 sm:h-3 rounded-full ${i % 3 === 0 ? 'bg-red-500' : i % 3 === 1 ? 'bg-green-500' : 'bg-yellow-400'
+                            }`}
                         style={{
-                            left: `calc(50% + ${Math.cos((i * 22.5 - 90) * Math.PI / 180) * 220}px)`,
-                            top: `calc(50% + ${Math.sin((i * 22.5 - 90) * Math.PI / 180) * 220}px)`,
+                            left: `calc(50% + ${Math.cos((i * 18 - 90) * Math.PI / 180) * 190}px)`,
+                            top: `calc(50% + ${Math.sin((i * 18 - 90) * Math.PI / 180) * 190}px)`,
                             transform: 'translate(-50%, -50%)',
-                            animationDelay: `${i * 150}ms`,
-                            boxShadow: i % 2 === 0 ? '0 0 8px #ef4444' : '0 0 8px #22c55e',
+                            animation: `twinkle 1.5s ease-in-out infinite`,
+                            animationDelay: `${i * 100}ms`,
+                            boxShadow: i % 3 === 0
+                                ? '0 0 10px #ef4444, 0 0 20px #ef4444'
+                                : i % 3 === 1
+                                    ? '0 0 10px #22c55e, 0 0 20px #22c55e'
+                                    : '0 0 10px #facc15, 0 0 20px #facc15',
                         }}
                     />
                 ))}
@@ -212,15 +256,19 @@ export default function SpinWheel({
                 @keyframes pulse-glow {
                     0%, 100% { 
                         box-shadow: 0 0 20px rgba(234, 179, 8, 0.6), 0 0 40px rgba(234, 179, 8, 0.3);
-                        transform: translate(-50%, -50%) scale(1);
+                        transform: scale(1);
                     }
                     50% { 
                         box-shadow: 0 0 30px rgba(234, 179, 8, 0.8), 0 0 60px rgba(234, 179, 8, 0.5);
-                        transform: translate(-50%, -50%) scale(1.05);
+                        transform: scale(1.05);
                     }
                 }
                 .animate-pulse-glow {
                     animation: pulse-glow 1.5s ease-in-out infinite;
+                }
+                @keyframes twinkle {
+                    0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
                 }
             `}</style>
         </div>

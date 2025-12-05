@@ -58,10 +58,21 @@ interface HistoryPagination {
 }
 
 // Snowflake component
-function Snowflake({ style }: { style: React.CSSProperties }) {
+const snowChars = ['❄', '❅', '❆', '✻', '✼', '❉'];
+function Snowflake({ style, char }: { style: React.CSSProperties; char?: string }) {
     return (
-        <div className="snowflake" style={style}>
-            ❄
+        <div
+            style={{
+                position: 'fixed',
+                top: '-30px',
+                color: '#fff',
+                textShadow: '0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(200,200,255,0.7)',
+                zIndex: 50,
+                pointerEvents: 'none',
+                ...style,
+            }}
+        >
+            {char || '❄'}
         </div>
     );
 }
@@ -77,6 +88,7 @@ export default function SpinPage() {
     const [wonPrize, setWonPrize] = useState<Prize | null>(null);
     const [currentTurn, setCurrentTurn] = useState(0);
     const [showResult, setShowResult] = useState(false);
+    const [historyLoading, setHistoryLoading] = useState(false);
 
     // History state
     const [history, setHistory] = useState<SpinHistoryItem[]>([]);
@@ -84,25 +96,32 @@ export default function SpinPage() {
     const [historyPagination, setHistoryPagination] = useState<HistoryPagination | null>(null);
 
     // Snowflakes
-    const [snowflakes, setSnowflakes] = useState<{ id: number; style: React.CSSProperties }[]>([]);
+    const [snowflakes, setSnowflakes] = useState<{ id: number; char: string; style: React.CSSProperties }[]>([]);
 
     useEffect(() => {
-        // Generate snowflakes
-        const flakes = Array.from({ length: 50 }, (_, i) => ({
-            id: i,
-            style: {
-                left: `${Math.random() * 100}%`,
-                animationDuration: `${Math.random() * 3 + 2}s`,
-                animationDelay: `${Math.random() * 2}s`,
-                fontSize: `${Math.random() * 10 + 10}px`,
-                opacity: Math.random() * 0.7 + 0.3,
-            },
-        }));
+        // Generate snowflakes with animation
+        const flakes = Array.from({ length: 40 }, (_, i) => {
+            const duration = Math.random() * 5 + 6; // 6-11s
+            const delay = Math.random() * 5;
+            const size = Math.random() * 12 + 14; // 14-26px
+
+            return {
+                id: i,
+                char: snowChars[Math.floor(Math.random() * snowChars.length)],
+                style: {
+                    left: `${Math.random() * 100}%`,
+                    fontSize: `${size}px`,
+                    opacity: Math.random() * 0.4 + 0.6,
+                    animation: `snowfall ${duration}s linear ${delay}s infinite`,
+                },
+            };
+        });
         setSnowflakes(flakes);
     }, []);
 
     // Fetch history
     const fetchHistory = useCallback(async () => {
+        setHistoryLoading(true);
         try {
             const response = await fetch(`/api/spin/history?page=${historyPage}&limit=5`);
             const data = await response.json();
@@ -112,6 +131,8 @@ export default function SpinPage() {
             }
         } catch (error) {
             console.error('Error fetching history:', error);
+        } finally {
+            setHistoryLoading(false);
         }
     }, [historyPage]);
 
@@ -205,14 +226,13 @@ export default function SpinPage() {
     };
 
     const formatDateTime = (dateStr: string) => {
-        return new Date(dateStr).toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Asia/Ho_Chi_Minh'
-        });
+        const date = new Date(dateStr);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        return `${hours}:${minutes} ${day}/${month}/${year}`;
     };
 
     if (loading) {
@@ -239,19 +259,32 @@ export default function SpinPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-red-900 via-red-800 to-green-900 py-8 px-4 relative overflow-hidden">
-            {/* Snowfall */}
+        <div className="min-h-screen bg-[#0c1a0c] py-8 px-4 relative overflow-hidden">
+            {/* Christmas gradient overlay */}
+            <div className="fixed inset-0 bg-gradient-to-b from-red-950/80 via-transparent to-green-950/60 pointer-events-none z-0" />
+
+            {/* Bokeh lights effect */}
             <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-20 left-10 w-32 h-32 bg-red-500/20 rounded-full blur-3xl" />
+                <div className="absolute top-40 right-20 w-40 h-40 bg-green-500/15 rounded-full blur-3xl" />
+                <div className="absolute bottom-40 left-1/4 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-20 right-1/3 w-36 h-36 bg-red-500/15 rounded-full blur-3xl" />
+            </div>
+
+            {/* Snowfall */}
+            <div className="fixed inset-0 pointer-events-none z-[5]">
                 {snowflakes.map((flake) => (
-                    <Snowflake key={flake.id} style={flake.style} />
+                    <Snowflake key={flake.id} style={flake.style} char={flake.char} />
                 ))}
             </div>
 
-            {/* Christmas trees decoration */}
-            <div className="fixed bottom-0 left-4 text-6xl opacity-30 z-0">🎄</div>
-            <div className="fixed bottom-0 right-4 text-6xl opacity-30 z-0">🎄</div>
-            <div className="fixed bottom-0 left-1/4 text-4xl opacity-20 z-0">🎄</div>
-            <div className="fixed bottom-0 right-1/4 text-4xl opacity-20 z-0">🎄</div>
+            {/* Christmas decorations */}
+            <div className="fixed bottom-0 left-2 text-5xl sm:text-7xl opacity-40 z-0">🎄</div>
+            <div className="fixed bottom-0 right-2 text-5xl sm:text-7xl opacity-40 z-0">🎄</div>
+            <div className="fixed top-10 left-10 text-2xl opacity-50 z-0 animate-pulse">⭐</div>
+            <div className="fixed top-20 right-16 text-xl opacity-40 z-0 animate-pulse" style={{ animationDelay: '0.5s' }}>✨</div>
+            <div className="fixed bottom-32 left-8 text-xl opacity-30 z-0">🎁</div>
+            <div className="fixed bottom-24 right-12 text-xl opacity-30 z-0">🎁</div>
 
             <div className="max-w-4xl mx-auto relative z-10">
                 {/* Header */}
@@ -364,14 +397,23 @@ export default function SpinPage() {
                         <table className="w-full text-sm">
                             <thead className="bg-green-900/50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Thời gian</th>
-                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium hidden sm:table-cell">Chi nhánh</th>
-                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Khách hàng</th>
-                                    <th className="px-4 py-3 text-left text-yellow-200 font-medium">Quà 🎁</th>
+                                    <th className="px-3 py-3 text-left text-yellow-200 font-medium w-24">Thời gian</th>
+                                    <th className="px-3 py-3 text-left text-yellow-200 font-medium hidden sm:table-cell">Chi nhánh</th>
+                                    <th className="px-3 py-3 text-left text-yellow-200 font-medium">Khách hàng</th>
+                                    <th className="px-3 py-3 text-left text-yellow-200 font-medium">Quà tặng 🎁</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/10">
-                                {history.length === 0 ? (
+                                {historyLoading ? (
+                                    <tr>
+                                        <td colSpan={4} className="px-4 py-8 text-center text-white/50">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                                                <span>Đang tải...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : history.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-4 py-8 text-center text-white/50">
                                             🎄 Chưa có lượt quay nào
@@ -380,11 +422,11 @@ export default function SpinPage() {
                                 ) : (
                                     history.map((item) => (
                                         <tr key={item.id} className="hover:bg-white/5">
-                                            <td className="px-4 py-3 text-white/70">{formatDateTime(item.spun_at)}</td>
-                                            <td className="px-4 py-3 text-white/70 hidden sm:table-cell">{item.branch_name}</td>
-                                            <td className="px-4 py-3 text-white">{item.customer_name || 'Khách'}</td>
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.prize_type === 'no_prize'
+                                            <td className="px-3 py-3 text-white/70 text-xs whitespace-nowrap">{formatDateTime(item.spun_at)}</td>
+                                            <td className="px-3 py-3 text-white/70 hidden sm:table-cell max-w-[80px] truncate">{item.branch_name}</td>
+                                            <td className="px-3 py-3 text-white max-w-[80px] truncate">{item.customer_name || 'Khách'}</td>
+                                            <td className="px-3 py-3">
+                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium max-w-[100px] truncate ${item.prize_type === 'no_prize'
                                                     ? 'bg-gray-500/30 text-gray-300'
                                                     : 'bg-red-500/30 text-yellow-200'
                                                     }`}>
@@ -462,35 +504,6 @@ export default function SpinPage() {
                     </div>
                 )}
             </div>
-
-            <style jsx>{`
-                @keyframes bounce-in {
-                    0% { transform: scale(0.5); opacity: 0; }
-                    70% { transform: scale(1.05); }
-                    100% { transform: scale(1); opacity: 1; }
-                }
-                .animate-bounce-in {
-                    animation: bounce-in 0.5s ease-out;
-                }
-                @keyframes slide-up {
-                    0% { transform: translateY(100%); opacity: 0; }
-                    100% { transform: translateY(0); opacity: 1; }
-                }
-                .animate-slide-up {
-                    animation: slide-up 0.4s ease-out;
-                }
-                @keyframes snowfall {
-                    0% { transform: translateY(-10vh) rotate(0deg); }
-                    100% { transform: translateY(110vh) rotate(360deg); }
-                }
-                .snowflake {
-                    position: fixed;
-                    top: -10vh;
-                    color: white;
-                    animation: snowfall linear infinite;
-                    z-index: 1;
-                }
-            `}</style>
         </div>
     );
 }
