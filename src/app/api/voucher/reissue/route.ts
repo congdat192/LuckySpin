@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate new voucher code
-        const newVoucherCode = generateVoucherCode('XMAS');
+        const newVoucherCode = generateVoucherCode();
 
         // Create new voucher in KiotViet
         await createVoucher(campaign.kiotviet_campaign_id, newVoucherCode);
