@@ -425,6 +425,7 @@ export default function SpinPage() {
                         {/* Glow effect */}
                         <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-3xl scale-110" />
                         <SpinWheel
+                            key={session?.session_id || 'default'}
                             prizes={event.prizes}
                             isSpinning={isSpinning}
                             targetIndex={targetIndex}

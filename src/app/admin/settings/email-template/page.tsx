@@ -29,6 +29,10 @@ const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                 <p style="font-size: 24px; color: #c41e3a; font-weight: bold; margin: 20px 0;">
                     Trị giá: {{value}}đ
                 </p>
+                <div style="margin: 20px 0;">
+                    <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Quét mã QR để sử dụng:</p>
+                    <img src="{{qr_code}}" alt="QR Voucher" style="width: 150px; height: 150px; border: 3px solid #ffd700; border-radius: 8px;" />
+                </div>
             </td>
         </tr>
         <tr>
@@ -119,7 +123,8 @@ export default function EmailTemplatePage() {
         .replace(/\{\{voucher_code\}\}/g, 'XMAS-ABC123XY')
         .replace(/\{\{value\}\}/g, '100.000')
         .replace(/\{\{expire_date\}\}/g, '31/12/2024')
-        .replace(/\{\{conditions\}\}/g, 'Áp dụng cho hóa đơn từ 500.000đ');
+        .replace(/\{\{conditions\}\}/g, 'Áp dụng cho hóa đơn từ 500.000đ')
+        .replace(/\{\{qr_code\}\}/g, 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=XMAS-ABC123XY');
 
     if (loading) {
         return (
@@ -179,10 +184,11 @@ export default function EmailTemplatePage() {
                 <div className="bg-white rounded-xl shadow p-6 mb-6">
                     <h2 className="text-lg font-semibold mb-4">Biến có thể sử dụng</h2>
                     <div className="flex flex-wrap gap-2">
-                        {['{{voucher_code}}', '{{value}}', '{{expire_date}}', '{{conditions}}'].map(v => (
+                        {['{{voucher_code}}', '{{value}}', '{{expire_date}}', '{{conditions}}', '{{qr_code}}'].map(v => (
                             <code key={v} className="px-2 py-1 bg-gray-100 rounded text-sm">{v}</code>
                         ))}
                     </div>
+                    <p className="text-sm text-gray-500 mt-2">💡 <code>{'{{qr_code}}'}</code> sẽ tự động tạo mã QR chứa voucher code</p>
                 </div>
 
                 <div className={`grid ${showPreview ? 'grid-cols-2 gap-6' : 'grid-cols-1'}`}>

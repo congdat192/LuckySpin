@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
+import QRCode from 'qrcode';
 
 interface EmailVoucherRequest {
     voucher_id: string;
@@ -33,6 +34,10 @@ const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                 <p style="font-size: 24px; color: #c41e3a; font-weight: bold; margin: 20px 0;">
                     Trị giá: {{value}}đ
                 </p>
+                <div style="margin: 20px 0;">
+                    <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Quét mã QR để sử dụng:</p>
+                    <img src="{{qr_code}}" alt="QR Voucher" style="width: 150px; height: 150px; border: 3px solid #ffd700; border-radius: 8px;" />
+                </div>
             </td>
         </tr>
         <tr>
@@ -126,12 +131,44 @@ export async function POST(request: NextRequest) {
             : 'Không giới hạn';
         const valueFormatted = new Intl.NumberFormat('vi-VN').format(voucher.value);
 
+        // Generate QR code as buffer and upload to Supabase Storage
+        let qrCodeUrl = '';
+        try {
+            const qrBuffer = await QRCode.toBuffer(voucher.voucher_code, {
+                width: 200,
+                margin: 1,
+                color: {
+                    dark: '#333333',
+                    light: '#ffffff',
+                },
+            });
+
+            // Upload QR to Supabase Storage
+            const fileName = `qr_${voucher.voucher_code}_${Date.now()}.png`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('prize-images')
+                .upload(`qrcodes/${fileName}`, qrBuffer, {
+                    contentType: 'image/png',
+                    upsert: true,
+                });
+
+            if (!uploadError && uploadData) {
+                const { data: urlData } = supabase.storage
+                    .from('prize-images')
+                    .getPublicUrl(`qrcodes/${fileName}`);
+                qrCodeUrl = urlData.publicUrl;
+            }
+        } catch (qrError) {
+            console.error('QR generation error:', qrError);
+        }
+
         // Replace placeholders in template
         const htmlContent = emailTemplate
             .replace(/\{\{voucher_code\}\}/g, voucher.voucher_code)
             .replace(/\{\{value\}\}/g, valueFormatted)
             .replace(/\{\{expire_date\}\}/g, expireDate)
-            .replace(/\{\{conditions\}\}/g, campaign?.conditions_text || 'Không có điều kiện đặc biệt');
+            .replace(/\{\{conditions\}\}/g, campaign?.conditions_text || 'Không có điều kiện đặc biệt')
+            .replace(/\{\{qr_code\}\}/g, qrCodeUrl || 'https://via.placeholder.com/150?text=QR');
 
         const subject = emailSubject
             .replace(/\{\{value\}\}/g, valueFormatted)
@@ -153,13 +190,25 @@ export async function POST(request: NextRequest) {
             throw new Error('Failed to send email');
         }
 
-        // Update voucher record
+        // Update voucher record with email data for preview later
+        const emailData = {
+            voucher_code: voucher.voucher_code,
+            value: valueFormatted,
+            expire_date: expireDate,
+            conditions: campaign?.conditions_text || 'Không có điều kiện đặc biệt',
+            qr_code_url: qrCodeUrl || null,
+            recipient_email: email,
+            sent_at: new Date().toISOString(),
+            subject: subject,
+        };
+
         await supabase
             .from('issued_vouchers')
             .update({
                 customer_email: email,
                 email_sent: true,
                 email_sent_at: new Date().toISOString(),
+                email_data: emailData,
             })
             .eq('id', voucher_id);
 

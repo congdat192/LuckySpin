@@ -169,20 +169,30 @@ export default function SpinWheel({
     useEffect(() => {
         if (!isSpinning || targetIndex === null) return;
 
-        const startRotation = currentRotation;
+        // Always start from current rotation (normalized)
+        const startRotation = currentRotation % 360;
 
-        // Calculate exact center of target segment
-        // Pointer is at top (0 degrees), segments start from -90 degrees
-        // To land on segment N, we need to rotate so segment N's center aligns with the pointer
-        const segmentCenterOffset = segmentAngle / 2;
-        const targetSegmentAngle = targetIndex * segmentAngle + segmentCenterOffset;
+        // The pointer is at the TOP (12 o'clock position / -90 degrees from x-axis)
+        // Segment i draws from angle: (i * segmentAngle - 90 + rotation) degrees
+        // So segment i's center is at: (i * segmentAngle + segmentAngle/2 - 90 + rotation) degrees
+        // 
+        // For the pointer (at -90° from x-axis, or equivalently 270°) to point to segment N's center:
+        // We need: -90 ≡ (N * segmentAngle + segmentAngle/2 - 90 + rotation) mod 360
+        // => rotation = -N * segmentAngle - segmentAngle/2
+        // => rotation = -(targetIndex + 0.5) * segmentAngle
+        // 
+        // For clockwise spin (positive rotation), we add full rotations:
+        // finalRotation = 360 * numSpins - (targetIndex + 0.5) * segmentAngle
 
-        // Calculate target rotation (5 full spins + position to land in center)
-        // We subtract because wheel rotates clockwise
-        const targetRotation =
-            startRotation +
-            360 * 5 + // 5 full rotations for suspense
-            (360 - targetSegmentAngle); // Land exactly on center of prize
+        const numSpins = 5; // Number of full spins for visual effect
+        const offsetToCenter = (targetIndex + 0.5) * segmentAngle;
+
+        // Calculate the exact final rotation that puts segment center at pointer
+        // We need the wheel to end up at a position where the target segment's center aligns with the pointer
+        const baseTargetRotation = 360 * numSpins - offsetToCenter;
+
+        // Ensure we always spin forward from current position
+        const targetRotation = startRotation + baseTargetRotation + 360; // Add extra 360 to ensure forward motion
 
         const duration = 8000; // 8 seconds
         const startTime = Date.now();
@@ -195,13 +205,14 @@ export default function SpinWheel({
             const eased = 1 - Math.pow(1 - progress, 3);
 
             const rotation = startRotation + (targetRotation - startRotation) * eased;
-            setCurrentRotation(rotation % 360);
+            setCurrentRotation(rotation);
 
             if (progress < 1) {
                 animationRef.current = requestAnimationFrame(animate);
             } else {
-                // Animation complete - set exact final position
-                setCurrentRotation(targetRotation % 360);
+                // Animation complete - set exact final position (normalized)
+                const finalRotation = targetRotation % 360;
+                setCurrentRotation(finalRotation >= 0 ? finalRotation : finalRotation + 360);
                 setTimeout(onSpinComplete, 500);
             }
         };
