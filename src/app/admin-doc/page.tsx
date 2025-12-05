@@ -259,7 +259,7 @@ export default function AdminDocPage() {
                                     </div>
                                     <div className="p-4 bg-white border border-gray-200 rounded-lg">
                                         <span className="font-bold text-gray-600">Không trúng</span>
-                                        <p className="text-sm text-gray-500 mt-1">Ô "Chúc bạn may mắn lần sau".</p>
+                                        <p className="text-sm text-gray-500 mt-1">Ô &quot;Chúc bạn may mắn lần sau&quot;.</p>
                                     </div>
                                 </div>
                                 <div className="mt-4 p-4 bg-blue-50 rounded-lg">
@@ -307,21 +307,21 @@ export default function AdminDocPage() {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Khi tất cả quà đều hết:</h4>
-                                    <p className="text-sm">Nếu có ô "Không trúng" → Khách luôn quay vào ô này.<br/>Nếu không có ô "Không trúng" → Hệ thống báo lỗi, không quay được.</p>
+                                    <p className="text-sm">Nếu có ô &quot;Không trúng&quot; → Khách luôn quay vào ô này.<br />Nếu không có ô &quot;Không trúng&quot; → Hệ thống báo lỗi, không quay được.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Voucher Unlimited Tip */}
                         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
-                            <h3 className="font-bold text-blue-900 mb-3">💡 Mẹo: Voucher "Vô hạn"</h3>
+                            <h3 className="font-bold text-blue-900 mb-3">💡 Mẹo: Voucher &quot;Vô hạn&quot;</h3>
                             <p className="text-blue-800 mb-3">
                                 Nếu bạn muốn voucher luôn có thể trúng mà không lo hết hàng, hãy nhập số lượng lớn:
                             </p>
                             <div className="bg-white p-4 rounded-lg border border-blue-200">
                                 <code className="text-lg font-mono text-blue-600">99999</code>
                                 <p className="text-sm text-gray-600 mt-2">
-                                    Với số lượng này, voucher gần như "vô hạn" trong suốt chương trình.
+                                    Với số lượng này, voucher gần như &quot;vô hạn&quot; trong suốt chương trình.
                                 </p>
                             </div>
                         </div>
@@ -410,7 +410,7 @@ export default function AdminDocPage() {
                             </div>
                             <div className="bg-white border border-gray-200 rounded-lg p-5">
                                 <h4 className="font-bold text-gray-900 mb-2">Khách không nhận được email?</h4>
-                                <p className="text-gray-600 text-sm">Yêu cầu khách kiểm tra hộp thư Spam/Junk. Nếu vẫn không thấy, vào "Voucher đã phát" để kiểm tra trạng thái gửi và xác nhận lại địa chỉ email.</p>
+                                <p className="text-gray-600 text-sm">Yêu cầu khách kiểm tra hộp thư Spam/Junk. Nếu vẫn không thấy, vào &quot;Voucher đã phát&quot; để kiểm tra trạng thái gửi và xác nhận lại địa chỉ email.</p>
                             </div>
                         </div>
                     </section>
