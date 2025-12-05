@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 
 interface Prize {
     id: string;
@@ -258,15 +259,18 @@ export default function SpinWheel({
                 cancelAnimationFrame(animationRef.current);
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSpinning, targetIndex, segmentAngle, onSpinComplete]);
 
     return (
         <div className="relative mx-4 sm:mx-0">
             {/* Pointer - Custom Logo */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20">
-                <img
+                <Image
                     src="/pointer.png"
                     alt="Pointer"
+                    width={56}
+                    height={56}
                     className="w-12 h-12 sm:w-14 sm:h-14"
                     style={{
                         filter: `

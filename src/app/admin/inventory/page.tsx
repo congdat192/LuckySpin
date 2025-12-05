@@ -248,7 +248,7 @@ export default function InventoryPage() {
             }
 
             // Parse headers (first row)
-            const headerRow = jsonData[0] as string[];
+            const headerRow = jsonData[0] as unknown as string[];
             const headers = headerRow.map(h => String(h || '').trim().toLowerCase());
             const branchCodeIdx = headers.indexOf('branch_code');
             const prizeNameIdx = headers.indexOf('prize_name');
@@ -268,7 +268,7 @@ export default function InventoryPage() {
             // Parse and validate data rows
             const previewRows: ImportPreviewRow[] = [];
             for (let i = 1; i < jsonData.length; i++) {
-                const row = jsonData[i] as (string | number)[];
+                const row = jsonData[i] as unknown as (string | number)[];
                 if (!row || row.length === 0) continue;
 
                 const branchCode = String(row[branchCodeIdx] || '').trim();

@@ -77,7 +77,9 @@ export default function EmailTemplatePage() {
                 const data = await response.json();
                 if (data.success && data.data) {
                     setTemplate(data.data.template || DEFAULT_TEMPLATE);
-                    setSubject(data.data.subject || subject);
+                    if (data.data.subject) {
+                        setSubject(data.data.subject);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching template:', error);
