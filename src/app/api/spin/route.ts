@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
 
                     if (campaign) {
                         // Generate and create voucher
-                        const voucherCode = generateVoucherCode('XMAS');
+                        const voucherCode = generateVoucherCode();
 
                         // Create voucher in KiotViet
                         await createVoucher(campaign.kiotviet_campaign_id, voucherCode);

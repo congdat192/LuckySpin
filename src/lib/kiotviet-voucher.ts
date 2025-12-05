@@ -199,11 +199,14 @@ export async function cancelVoucher(
     }
 }
 
-// Generate unique voucher code
-export function generateVoucherCode(prefix: string = 'XMAS'): string {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${prefix}-${timestamp}${random}`.substring(0, 16);
+// Generate unique voucher code - 8 characters starting with XM
+export function generateVoucherCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 0, 1 to avoid confusion
+    let code = 'XM';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
 }
 
 // Calculate expire date based on campaign settings
