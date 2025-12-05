@@ -222,7 +222,7 @@ export default function EditEventPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-6">
                 <Link
                     href="/admin/events"
@@ -457,64 +457,74 @@ export default function EditEventPage() {
                         </button>
                     </div>
 
-                    <div className="space-y-3">
+                    {/* Column Headers */}
+                    <div className="grid grid-cols-[40px_160px_110px_1fr_90px_40px] gap-2 px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-200 mb-2">
+                        <div></div>
+                        <div>Tên quà</div>
+                        <div>Loại</div>
+                        <div>Đợt phát hành / Mô tả</div>
+                        <div className="text-center">Tỉ lệ</div>
+                        <div></div>
+                    </div>
+
+                    <div className="space-y-2">
                         {prizes.map((prize) => (
                             <div
                                 key={prize.id}
-                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
+                                className="grid grid-cols-[40px_160px_110px_1fr_90px_40px] gap-2 items-center p-2 bg-gray-50 rounded-lg"
                             >
                                 <input
                                     type="color"
                                     value={prize.color}
                                     onChange={(e) => updatePrize(prize.id, 'color', e.target.value)}
-                                    className="w-10 h-10 rounded cursor-pointer flex-shrink-0"
+                                    className="w-8 h-8 rounded cursor-pointer"
                                 />
-                                <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
-                                    <input
-                                        type="text"
-                                        value={prize.name}
-                                        onChange={(e) => updatePrize(prize.id, 'name', e.target.value)}
-                                        className="px-3 py-2 border border-gray-300 rounded-lg"
-                                        placeholder="Tên quà"
-                                    />
-                                    <select
-                                        value={prize.prize_type}
-                                        onChange={(e) => updatePrize(prize.id, 'prize_type', e.target.value)}
-                                        className="px-3 py-2 border border-gray-300 rounded-lg"
-                                    >
-                                        <option value="voucher">Voucher</option>
-                                        <option value="physical">Quà vật lý</option>
-                                        <option value="discount">Giảm giá</option>
-                                        <option value="no_prize">Không trúng</option>
-                                    </select>
+                                <input
+                                    type="text"
+                                    value={prize.name}
+                                    onChange={(e) => updatePrize(prize.id, 'name', e.target.value)}
+                                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
+                                    placeholder="Tên quà"
+                                />
+                                <select
+                                    value={prize.prize_type}
+                                    onChange={(e) => updatePrize(prize.id, 'prize_type', e.target.value)}
+                                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
+                                >
+                                    <option value="voucher">Voucher</option>
+                                    <option value="physical">Quà vật lý</option>
+                                    <option value="discount">Giảm giá</option>
+                                    <option value="no_prize">Không trúng</option>
+                                </select>
+                                <div className="min-w-0">
                                     {prize.prize_type === 'voucher' ? (
-                                        <>
+                                        <div className="flex items-center gap-1">
                                             <select
                                                 value={prize.voucher_campaign_id}
                                                 onChange={(e) => updatePrize(prize.id, 'voucher_campaign_id', e.target.value)}
-                                                className="px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 rounded-lg text-sm truncate"
                                             >
-                                                <option value="">-- Chọn đợt phát hành --</option>
+                                                <option value="">-- Chọn đợt PH --</option>
                                                 {voucherCampaigns.map(c => (
                                                     <option key={c.id} value={c.id}>
-                                                        {c.code} - {c.name} ({new Intl.NumberFormat('vi-VN').format(c.value)}đ)
+                                                        {c.code} - {c.name}
                                                     </option>
                                                 ))}
                                             </select>
                                             {prize.voucher_campaign_id && (
-                                                <span className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                                                <span className="flex-shrink-0 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">
                                                     {new Intl.NumberFormat('vi-VN').format(
                                                         voucherCampaigns.find(c => c.id === prize.voucher_campaign_id)?.value || 0
                                                     )}đ
                                                 </span>
                                             )}
-                                        </>
+                                        </div>
                                     ) : prize.prize_type === 'discount' ? (
                                         <input
                                             type="number"
                                             value={prize.value}
                                             onChange={(e) => updatePrize(prize.id, 'value', e.target.value)}
-                                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                                            className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
                                             placeholder="Giá trị (VNĐ)"
                                         />
                                     ) : prize.prize_type === 'physical' ? (
@@ -522,30 +532,30 @@ export default function EditEventPage() {
                                             type="text"
                                             value={prize.description}
                                             onChange={(e) => updatePrize(prize.id, 'description', e.target.value)}
-                                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                                            className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
                                             placeholder="Mô tả quà"
                                         />
                                     ) : (
-                                        <div />
+                                        <span className="text-gray-400 text-sm">—</span>
                                     )}
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="number"
-                                            value={prize.default_weight}
-                                            onChange={(e) => updatePrize(prize.id, 'default_weight', e.target.value)}
-                                            className="w-20 px-2 py-2 border border-gray-300 rounded-lg text-center"
-                                            min="0"
-                                        />
-                                        <span className="text-gray-500 text-sm">%</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => removePrize(prize.id)}
-                                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg ml-auto"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
                                 </div>
+                                <div className="flex items-center justify-center gap-0.5">
+                                    <input
+                                        type="number"
+                                        value={prize.default_weight}
+                                        onChange={(e) => updatePrize(prize.id, 'default_weight', e.target.value)}
+                                        className="w-12 px-1 py-1.5 border border-gray-300 rounded-lg text-sm text-center"
+                                        min="0"
+                                    />
+                                    <span className="text-gray-500 text-xs">%</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removePrize(prize.id)}
+                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
                             </div>
                         ))}
                     </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw, Gift, Edit2, Save, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Gift, Edit2, Save, X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface VoucherCampaign {
     id: string;
@@ -25,8 +25,11 @@ export default function VoucherCampaignsPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editConditions, setEditConditions] = useState('');
     const [saving, setSaving] = useState(false);
-
     const [syncMessage, setSyncMessage] = useState('');
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     const fetchCampaigns = async (sync: boolean = false) => {
         try {
@@ -59,6 +62,18 @@ export default function VoucherCampaignsPage() {
     useEffect(() => {
         fetchCampaigns();
     }, []);
+
+    // Reset to first page when page size changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [pageSize]);
+
+    // Pagination calculations
+    const totalPages = Math.ceil(campaigns.length / pageSize);
+    const paginatedCampaigns = useMemo(() => {
+        const startIndex = (currentPage - 1) * pageSize;
+        return campaigns.slice(startIndex, startIndex + pageSize);
+    }, [campaigns, currentPage, pageSize]);
 
     const handleEdit = (campaign: VoucherCampaign) => {
         setEditingId(campaign.id);
@@ -139,86 +154,149 @@ export default function VoucherCampaignsPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl shadow overflow-hidden">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Mã</th>
-                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Tên đợt phát hành</th>
-                                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">Mệnh giá</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Thời hạn</th>
-                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Điều kiện sử dụng</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Trạng thái</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {campaigns.map((campaign) => (
-                                    <tr key={campaign.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 font-mono text-sm">{campaign.code}</td>
-                                        <td className="px-4 py-3 font-medium">{campaign.name}</td>
-                                        <td className="px-4 py-3 text-right font-semibold text-green-600">
-                                            {formatCurrency(campaign.value)}
-                                        </td>
-                                        <td className="px-4 py-3 text-center text-sm text-gray-500">
-                                            {campaign.expire_days ? `${campaign.expire_days} ngày` :
-                                                `${formatDate(campaign.start_date)} - ${formatDate(campaign.end_date)}`}
-                                        </td>
-                                        <td className="px-4 py-3 max-w-xs">
-                                            {editingId === campaign.id ? (
-                                                <textarea
-                                                    value={editConditions}
-                                                    onChange={(e) => setEditConditions(e.target.value)}
-                                                    className="w-full px-2 py-1 border rounded text-sm"
-                                                    rows={2}
-                                                    placeholder="Nhập điều kiện sử dụng..."
-                                                />
-                                            ) : (
-                                                <span className="text-sm text-gray-600 line-clamp-2">
-                                                    {campaign.conditions_text || <span className="text-gray-400 italic">Chưa có</span>}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${campaign.is_active
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-500'
-                                                }`}>
-                                                {campaign.is_active ? 'Hoạt động' : 'Tạm dừng'}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            {editingId === campaign.id ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={() => handleSave(campaign.id)}
-                                                        disabled={saving}
-                                                        className="p-1 text-green-600 hover:text-green-800"
-                                                    >
-                                                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setEditingId(null)}
-                                                        className="p-1 text-gray-600 hover:text-gray-800"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleEdit(campaign)}
-                                                    className="p-1 text-blue-600 hover:text-blue-800"
-                                                    title="Sửa điều kiện"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                            )}
-                                        </td>
+                    <>
+                        <div className="bg-white rounded-xl shadow overflow-hidden">
+                            <table className="w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Mã</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Tên đợt phát hành</th>
+                                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">Mệnh giá</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Thời hạn</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Điều kiện sử dụng</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Trạng thái</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Thao tác</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {paginatedCampaigns.map((campaign) => (
+                                        <tr key={campaign.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-3 font-mono text-sm">{campaign.code}</td>
+                                            <td className="px-4 py-3 font-medium">{campaign.name}</td>
+                                            <td className="px-4 py-3 text-right font-semibold text-green-600">
+                                                {formatCurrency(campaign.value)}
+                                            </td>
+                                            <td className="px-4 py-3 text-center text-sm text-gray-500">
+                                                {campaign.expire_days ? `${campaign.expire_days} ngày` :
+                                                    `${formatDate(campaign.start_date)} - ${formatDate(campaign.end_date)}`}
+                                            </td>
+                                            <td className="px-4 py-3 max-w-xs">
+                                                {editingId === campaign.id ? (
+                                                    <textarea
+                                                        value={editConditions}
+                                                        onChange={(e) => setEditConditions(e.target.value)}
+                                                        className="w-full px-2 py-1 border rounded text-sm"
+                                                        rows={2}
+                                                        placeholder="Nhập điều kiện sử dụng..."
+                                                    />
+                                                ) : (
+                                                    <span className="text-sm text-gray-600 line-clamp-2">
+                                                        {campaign.conditions_text || <span className="text-gray-400 italic">Chưa có</span>}
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className={`px-2 py-1 rounded-full text-xs ${campaign.is_active
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    {campaign.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {editingId === campaign.id ? (
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            onClick={() => handleSave(campaign.id)}
+                                                            disabled={saving}
+                                                            className="p-1 text-green-600 hover:text-green-800"
+                                                        >
+                                                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="p-1 text-gray-600 hover:text-gray-800"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleEdit(campaign)}
+                                                        className="p-1 text-blue-600 hover:text-blue-800"
+                                                        title="Sửa điều kiện"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <span>Hiển thị</span>
+                                <select
+                                    value={pageSize}
+                                    onChange={(e) => setPageSize(Number(e.target.value))}
+                                    className="px-2 py-1 border border-gray-300 rounded-lg bg-white"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                </select>
+                                <span>/ {campaigns.length} đợt phát hành</span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                        .filter(page => {
+                                            // Show first, last, current and adjacent pages
+                                            if (page === 1 || page === totalPages) return true;
+                                            if (Math.abs(page - currentPage) <= 1) return true;
+                                            return false;
+                                        })
+                                        .map((page, idx, arr) => (
+                                            <span key={page} className="flex items-center">
+                                                {idx > 0 && arr[idx - 1] !== page - 1 && (
+                                                    <span className="px-2 text-gray-400">...</span>
+                                                )}
+                                                <button
+                                                    onClick={() => setCurrentPage(page)}
+                                                    className={`w-8 h-8 rounded-lg text-sm ${currentPage === page
+                                                            ? 'bg-purple-600 text-white'
+                                                            : 'hover:bg-gray-100 text-gray-600'
+                                                        }`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </span>
+                                        ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 <div className="mt-4 text-sm text-gray-500">

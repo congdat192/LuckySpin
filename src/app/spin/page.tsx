@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import SpinWheel from '@/components/SpinWheel';
 import InvoiceForm from '@/components/InvoiceForm';
-import { Gift, Sparkles, Trophy, RotateCcw, ChevronLeft, ChevronRight, History, TreePine } from 'lucide-react';
+import { Gift, Sparkles, Trophy, RotateCcw, ChevronLeft, ChevronRight, History, TreePine, ChevronDown } from 'lucide-react';
 
 interface Prize {
     id: string;
@@ -686,6 +686,94 @@ export default function SpinPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Terms and Conditions Accordion */}
+                <TermsAccordion />
+
+                {/* Footer */}
+                <footer className="mt-12 pt-8 border-t border-white/10 text-center">
+                    <p className="text-white/50 text-sm">
+                        © {new Date().getFullYear()} Bản quyền thuộc về{' '}
+                        <a
+                            href="https://matkinhtamduc.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-yellow-400/80 hover:text-yellow-400 transition"
+                        >
+                            Mắt Kính Tâm Đức
+                        </a>
+                        {' '}- matkinhtamduc.com
+                    </p>
+                </footer>
+            </div>
+        </div>
+    );
+}
+
+// Terms and Conditions Accordion Component
+function TermsAccordion() {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const terms = [
+        {
+            title: '1. Điều kiện tham gia',
+            content: `• Chương trình áp dụng cho tất cả khách hàng mua hàng tại hệ thống Mắt Kính Tâm Đức.
+• Mỗi hóa đơn mua hàng hợp lệ sẽ được tham gia quay thưởng theo giá trị hóa đơn.
+• Hóa đơn phải được thanh toán đầy đủ và không áp dụng cho đơn hàng đã hoàn trả.
+• Mỗi hóa đơn chỉ được sử dụng một lần để tham gia chương trình.`
+        },
+        {
+            title: '2. Quy định về giải thưởng',
+            content: `• Giải thưởng được xác định ngẫu nhiên bởi hệ thống.
+• Voucher giảm giá có thời hạn sử dụng và điều kiện áp dụng riêng.
+• Quà tặng vật lý cần liên hệ nhân viên cửa hàng để nhận.
+• Giải thưởng không được quy đổi thành tiền mặt.
+• Mỗi voucher chỉ được sử dụng một lần và không cộng gộp với các chương trình khác.`
+        },
+        {
+            title: '3. Thời gian và phạm vi áp dụng',
+            content: `• Chương trình có thời hạn theo từng đợt khuyến mãi.
+• Áp dụng tại tất cả chi nhánh thuộc hệ thống Mắt Kính Tâm Đức.
+• Ban tổ chức có quyền kết thúc chương trình sớm khi hết quà tặng.
+• Thời gian áp dụng voucher được ghi rõ trên từng mã voucher.`
+        },
+        {
+            title: '4. Quy định chung',
+            content: `• Ban tổ chức có quyền từ chối các trường hợp gian lận hoặc vi phạm điều khoản.
+• Trong trường hợp phát sinh tranh chấp, quyết định của Ban tổ chức là quyết định cuối cùng.
+• Bằng việc tham gia chương trình, khách hàng đồng ý với các điều khoản trên.
+• Mọi thắc mắc xin liên hệ nhân viên cửa hàng hoặc hotline để được hỗ trợ.`
+        }
+    ];
+
+    return (
+        <div className="mt-12">
+            <h2 className="text-xl font-bold text-white text-center mb-4 flex items-center justify-center gap-2">
+                📜 Điều kiện & Điều khoản
+            </h2>
+            <div className="bg-white/5 backdrop-blur rounded-xl border border-white/10 overflow-hidden">
+                {terms.map((term, index) => (
+                    <div key={index} className="border-b border-white/10 last:border-b-0">
+                        <button
+                            onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                            className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition"
+                        >
+                            <span className="text-yellow-200 font-medium text-sm">{term.title}</span>
+                            <ChevronDown
+                                className={`w-5 h-5 text-white/50 transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''
+                                    }`}
+                            />
+                        </button>
+                        <div
+                            className={`overflow-hidden transition-all duration-300 ${openIndex === index ? 'max-h-96' : 'max-h-0'
+                                }`}
+                        >
+                            <div className="px-4 pb-4 text-white/70 text-sm whitespace-pre-line">
+                                {term.content}
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
