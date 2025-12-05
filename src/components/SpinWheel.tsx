@@ -162,17 +162,21 @@ export default function SpinWheel({
 
     return (
         <div className="relative mx-4 sm:mx-0">
-            {/* Pointer */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
-                {/* Star on top */}
-                <div className="text-yellow-400 text-xl sm:text-2xl drop-shadow-lg -mb-2" style={{ textShadow: '0 0 10px #ffd700' }}>⭐</div>
-                {/* Triangle pointer */}
-                <div className="relative">
-                    <div className="w-0 h-0 border-l-[14px] border-r-[14px] border-t-[32px] sm:border-l-[18px] sm:border-r-[18px] sm:border-t-[40px] border-l-transparent border-r-transparent border-t-red-600"
-                        style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} />
-                    {/* Inner triangle for depth */}
-                    <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[18px] sm:border-l-[10px] sm:border-r-[10px] sm:border-t-[24px] border-l-transparent border-r-transparent border-t-red-500" />
-                </div>
+            {/* Pointer - Custom Logo */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20">
+                <img
+                    src="/pointer.png"
+                    alt="Pointer"
+                    className="w-12 h-12 sm:w-14 sm:h-14"
+                    style={{
+                        filter: `
+                            drop-shadow(0 0 1px white)
+                            drop-shadow(0 0 2px white)
+                            drop-shadow(0 0 3px rgba(255,255,255,0.8))
+                            drop-shadow(0 4px 6px rgba(0,0,0,0.4))
+                        `
+                    }}
+                />
             </div>
 
             {/* Wheel */}
