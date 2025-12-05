@@ -8,11 +8,13 @@ Hệ thống vòng quay may mắn đa sự kiện, tích hợp KiotViet API cho 
 - 🎯 **Multi-event**: Hỗ trợ nhiều sự kiện (Noel, Tết, Khai trương...)
 - 🏪 **Multi-branch**: Quản lý chi nhánh với inventory riêng, đồng bộ từ KiotViet
 - 🎁 **Flexible prizes**: Voucher, quà vật lý, giảm giá, không trúng
+- 🎫 **Voucher Integration**: Tích hợp KiotViet Voucher API - tự động phát hành voucher
+- 📧 **Email Voucher**: Gửi voucher qua email với template tùy chỉnh
 - 📊 **Admin Panel**: Dashboard, quản lý events, inventory, reports
 - 🔐 **Admin Auth**: Đăng nhập bằng username/password, hỗ trợ multi-user
 - 🔗 **KiotViet API**: Xác thực hóa đơn & đồng bộ chi nhánh realtime
 - 🎲 **Server-side random**: Weighted random đảm bảo công bằng
-- 📜 **Lịch sử quay**: Hiển thị công khai lịch sử quay thưởng với phân trang
+- 📜 **Lịch sử quay**: Click vào quà để xem chi tiết voucher
 - ✅ **Invoice validation**: Kiểm tra ngày hóa đơn, giá trị tối thiểu
 - ⏱️ **Rate limiting**: Giới hạn 3 lần tra cứu/phút cho mỗi IP
 
@@ -41,7 +43,11 @@ KIOTVIET_CLIENT_SECRET=xxx
 KIOTVIET_RETAILER=tencuahang
 
 # Admin (format: user1:pass1,user2:pass2)
-ADMIN_USERS=admin:Dat@6789,mkt:MKT@438
+ADMIN_USERS=admin:password123
+
+# Email (Resend)
+RESEND_API_KEY=re_xxx
+RESEND_FROM_EMAIL=Your Store <noreply@yourdomain.com>
 ```
 
 ### 3. Setup Database
@@ -68,7 +74,10 @@ Truy cập: http://localhost:3000
 | `/admin/branches` | Quản lý chi nhánh, sync từ KiotViet |
 | `/admin/inventory` | Quản lý tồn kho quà theo chi nhánh |
 | `/admin/reports` | Báo cáo & thống kê chi tiết |
+| `/admin/voucher-campaigns` | Đợt phát hành voucher từ KiotViet |
+| `/admin/issued-vouchers` | Voucher đã phát hành |
 | `/admin/settings` | Cài đặt & kiểm tra KiotViet |
+| `/admin/settings/email-template` | Tùy chỉnh template email voucher |
 
 ## 🔄 Flow hoạt động
 

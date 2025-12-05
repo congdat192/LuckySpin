@@ -121,12 +121,19 @@ Environment Variables cần set:
 
 ## Recent Updates (Dec 2024)
 
+### Voucher Integration
+- 🎫 KiotViet Voucher API integration - auto issue vouchers on win
+- 📧 Send voucher to customer email via Resend
+- 📝 Customizable email template in admin settings
+- 🔄 Sync voucher campaigns from KiotViet with pagination
+- 📋 Voucher code format: XM + 6 random chars (e.g., XM3K7N2P)
+
 ### UI/UX
 - 🎄 Christmas Theme: gradient đỏ/xanh, tuyết rơi, cây thông
 - 🎡 Nút quay ở giữa vòng quay với glow animation
 - 📱 Bottom sheet cho kết quả (không che vòng quay)
 - 🎯 Vòng quay luôn dừng chính xác giữa ô quà
-- 📱 Mobile responsive header optimization
+- 👆 Click vào quà trong lịch sử để xem chi tiết voucher
 
 ### Features
 - ✅ Admin authentication với multi-user
@@ -135,9 +142,12 @@ Environment Variables cần set:
 - ✅ Rate limiting: 3 lookups/minute per IP
 - ✅ Spin history với phân trang
 - ✅ Branch sync từ KiotViet
+- ✅ Admin pages: voucher-campaigns, issued-vouchers, email-template
 
 ### Bug Fixes
 - ✅ Preserve prize IDs khi update event
 - ✅ Fix inventory save với event_id
 - ✅ Fix FK constraints khi delete prizes
 - ✅ Fix error messages cho hóa đơn không đủ điều kiện
+- ✅ Fix voucher prize value auto-populate from campaign
+- ✅ Fix generateVoucherCode parameter (8 chars, starts with XM)
