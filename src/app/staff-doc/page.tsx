@@ -145,7 +145,7 @@ export default function StaffDocPage() {
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">Bước 1: Xuất hóa đơn & Thông báo</h3>
                                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                                     <p className="text-gray-600 mb-2">Sau khi thanh toán và xuất hóa đơn trên KiotViet, hãy thông báo ngay cho khách:</p>
-                                    <p className="text-blue-700 font-medium italic">"Dạ với hóa đơn này, anh/chị được tham gia Vòng Quay May Mắn với cơ hội trúng Voucher lên đến 500k ạ!"</p>
+                                    <p className="text-blue-700 font-medium italic">&quot;Dạ với hóa đơn này, anh/chị được tham gia Vòng Quay May Mắn với cơ hội trúng Voucher lên đến 500k ạ!&quot;</p>
                                 </div>
                             </div>
 
@@ -257,7 +257,7 @@ export default function StaffDocPage() {
                         <div className="space-y-4">
                             <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer">
                                 <summary className="font-bold text-gray-900 flex items-center justify-between">
-                                    Khách nhập mã báo "Hóa đơn không hợp lệ"?
+                                    Khách nhập mã báo &quot;Hóa đơn không hợp lệ&quot;?
                                     <ChevronRight className="w-5 h-5 transition-transform group-open:rotate-90" />
                                 </summary>
                                 <div className="mt-3 text-gray-600 text-sm pl-4 border-l-2 border-gray-200">
