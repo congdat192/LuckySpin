@@ -78,6 +78,8 @@ Truy cập: http://localhost:3000
 | `/admin/issued-vouchers` | Voucher đã phát hành |
 | `/admin/settings` | Cài đặt & kiểm tra KiotViet |
 | `/admin/settings/email-template` | Tùy chỉnh template email voucher |
+| `/admin-doc` | Tài liệu hướng dẫn cho Admin |
+| `/staff-doc` | Tài liệu hướng dẫn cho Nhân viên |
 
 ## 🔄 Flow hoạt động
 

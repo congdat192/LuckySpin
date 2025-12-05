@@ -151,3 +151,16 @@ Environment Variables cần set:
 - ✅ Fix error messages cho hóa đơn không đủ điều kiện
 - ✅ Fix voucher prize value auto-populate from campaign
 - ✅ Fix generateVoucherCode parameter (8 chars, starts with XM)
+
+### Documentation Pages (Dec 5, 2024)
+- 📚 `/admin-doc` - Hướng dẫn quản trị dành cho Admin
+- 📚 `/staff-doc` - Hướng dẫn nhân viên cửa hàng
+- ⚙️ Cơ chế quà: khi hết quà (quantity=0) sẽ không quay trúng, neuf tất cả hết sẽ vào ô "Không trúng"
+- 💡 Mẹo: Set voucher quantity = 99999 để "vô hạn"
+
+## ESLint Notes
+
+Khi viết nội dung JSX, cần lưu ý:
+- Dấu `"` trong text phải escape thành `&quot;`
+- Hoặc dùng smart quotes `“...”` hoặc `「...」`
+- Ví dụ: `Ô &quot;Không trúng&quot;` thay vì `Ô "Không trúng"`
