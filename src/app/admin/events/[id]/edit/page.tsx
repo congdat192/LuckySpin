@@ -13,6 +13,14 @@ interface PrizeInput {
     description: string;
     default_weight: string;
     color: string;
+    voucher_campaign_id: string;
+}
+
+interface VoucherCampaign {
+    id: string;
+    name: string;
+    value: number;
+    code: string;
 }
 
 interface RuleInput {
@@ -54,6 +62,9 @@ export default function EditEventPage() {
     // Prizes
     const [prizes, setPrizes] = useState<PrizeInput[]>([]);
 
+    // Voucher Campaigns
+    const [voucherCampaigns, setVoucherCampaigns] = useState<VoucherCampaign[]>([]);
+
     useEffect(() => {
         const fetchEvent = async () => {
             try {
@@ -85,7 +96,7 @@ export default function EditEventPage() {
 
                     // Load prizes
                     if (event.event_prizes && event.event_prizes.length > 0) {
-                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string }) => ({
+                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string; voucher_campaign_id?: string }) => ({
                             id: p.id,
                             name: p.name || '',
                             prize_type: p.prize_type || 'voucher',
@@ -93,7 +104,15 @@ export default function EditEventPage() {
                             description: p.description || '',
                             default_weight: String(p.default_weight || 0),
                             color: p.color || '#3B82F6',
+                            voucher_campaign_id: p.voucher_campaign_id || '',
                         })));
+                    }
+
+                    // Fetch voucher campaigns
+                    const campaignsRes = await fetch('/api/admin/voucher-campaigns');
+                    const campaignsData = await campaignsRes.json();
+                    if (campaignsData.success) {
+                        setVoucherCampaigns(campaignsData.data);
                     }
                 }
             } catch {
@@ -119,6 +138,7 @@ export default function EditEventPage() {
                 description: '',
                 default_weight: '10',
                 color: defaultColors[colorIndex],
+                voucher_campaign_id: '',
             },
         ]);
     };
@@ -174,6 +194,7 @@ export default function EditEventPage() {
                         description: p.description,
                         default_weight: p.default_weight,
                         color: p.color,
+                        voucher_campaign_id: p.voucher_campaign_id || null,
                     })),
                 }),
             });
@@ -466,7 +487,29 @@ export default function EditEventPage() {
                                         <option value="discount">Giảm giá</option>
                                         <option value="no_prize">Không trúng</option>
                                     </select>
-                                    {prize.prize_type === 'voucher' || prize.prize_type === 'discount' ? (
+                                    {prize.prize_type === 'voucher' ? (
+                                        <>
+                                            <select
+                                                value={prize.voucher_campaign_id}
+                                                onChange={(e) => updatePrize(prize.id, 'voucher_campaign_id', e.target.value)}
+                                                className="px-3 py-2 border border-gray-300 rounded-lg"
+                                            >
+                                                <option value="">-- Chọn đợt phát hành --</option>
+                                                {voucherCampaigns.map(c => (
+                                                    <option key={c.id} value={c.id}>
+                                                        {c.code} - {c.name} ({new Intl.NumberFormat('vi-VN').format(c.value)}đ)
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {prize.voucher_campaign_id && (
+                                                <span className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                                                    {new Intl.NumberFormat('vi-VN').format(
+                                                        voucherCampaigns.find(c => c.id === prize.voucher_campaign_id)?.value || 0
+                                                    )}đ
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : prize.prize_type === 'discount' ? (
                                         <input
                                             type="number"
                                             value={prize.value}

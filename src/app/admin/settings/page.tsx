@@ -130,7 +130,18 @@ export default function SettingsPage() {
             {/* Other Settings */}
             <section className="bg-white rounded-xl border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Cài đặt khác</h2>
-                <p className="text-gray-500 text-sm">Chưa có cài đặt bổ sung.</p>
+                <div className="space-y-3">
+                    <a
+                        href="/admin/settings/email-template"
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
+                    >
+                        <div>
+                            <p className="font-medium text-gray-900">📧 Template Email Voucher</p>
+                            <p className="text-sm text-gray-500">Tùy chỉnh nội dung email gửi voucher cho khách hàng</p>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-gray-400" />
+                    </a>
+                </div>
             </section>
         </div>
     );

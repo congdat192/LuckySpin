@@ -90,6 +90,18 @@ export default function SpinPage() {
     const [showResult, setShowResult] = useState(false);
     const [historyLoading, setHistoryLoading] = useState(false);
 
+    // Voucher state
+    const [voucherInfo, setVoucherInfo] = useState<{
+        voucher_id: string;
+        voucher_code: string;
+        value: number;
+        expire_date: string;
+        conditions: string;
+    } | null>(null);
+    const [voucherEmail, setVoucherEmail] = useState('');
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [emailSent, setEmailSent] = useState(false);
+
     // History state
     const [history, setHistory] = useState<SpinHistoryItem[]>([]);
     const [historyPage, setHistoryPage] = useState(1);
@@ -194,6 +206,11 @@ export default function SpinPage() {
                     ...prev,
                     remaining_turns: data.data.remaining_turns,
                 } : null);
+
+                // Store voucher info if present
+                if (data.data.voucher) {
+                    setVoucherInfo(data.data.voucher);
+                }
             } else {
                 alert(data.error);
                 setIsSpinning(false);
@@ -215,6 +232,36 @@ export default function SpinPage() {
         setShowResult(false);
         setWonPrize(null);
         setTargetIndex(null);
+        setVoucherInfo(null);
+        setVoucherEmail('');
+        setEmailSent(false);
+    };
+
+    const handleSendVoucherEmail = async () => {
+        if (!voucherInfo || !voucherEmail) return;
+
+        setSendingEmail(true);
+        try {
+            const response = await fetch('/api/voucher/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    voucher_id: voucherInfo.voucher_id,
+                    email: voucherEmail,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setEmailSent(true);
+            } else {
+                alert(data.error || 'Không thể gửi email');
+            }
+        } catch {
+            alert('Đã xảy ra lỗi khi gửi email');
+        } finally {
+            setSendingEmail(false);
+        }
     };
 
     const handleNewInvoice = () => {
@@ -473,6 +520,73 @@ export default function SpinPage() {
                                     <div className="text-6xl mb-4">❄️</div>
                                     <h3 className="text-2xl font-bold text-white mb-2">Chúc bạn may mắn lần sau!</h3>
                                     <p className="text-white/70 mb-6">🎄 Hãy thử lại với hóa đơn khác nhé 🎄</p>
+                                </>
+                            ) : wonPrize.type === 'voucher' && voucherInfo ? (
+                                <>
+                                    <div className="text-5xl mb-3">🎫</div>
+                                    <h3 className="text-xl font-bold text-yellow-300 mb-2">🎅 Chúc mừng Giáng sinh! 🎅</h3>
+                                    <p className="text-lg font-semibold text-white mb-3">{wonPrize.name}</p>
+
+                                    {/* Voucher Code Display */}
+                                    <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-4 mb-4">
+                                        <p className="text-sm text-yellow-900 mb-1">Mã voucher của bạn</p>
+                                        <div className="flex items-center justify-center gap-2">
+                                            <p className="text-2xl font-bold text-white tracking-widest">
+                                                {voucherInfo.voucher_code}
+                                            </p>
+                                            <button
+                                                onClick={() => navigator.clipboard.writeText(voucherInfo.voucher_code)}
+                                                className="p-1.5 bg-white/20 rounded-lg hover:bg-white/30 transition"
+                                                title="Sao chép mã"
+                                            >
+                                                📋
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Voucher Details */}
+                                    <div className="text-left bg-white/10 rounded-xl p-3 mb-4 text-sm">
+                                        <p className="text-white mb-1">
+                                            <span className="text-yellow-400">💰 Giá trị:</span> {new Intl.NumberFormat('vi-VN').format(voucherInfo.value)}đ
+                                        </p>
+                                        {voucherInfo.expire_date && (
+                                            <p className="text-white mb-1">
+                                                <span className="text-yellow-400">📅 Hết hạn:</span> {new Date(voucherInfo.expire_date).toLocaleDateString('vi-VN')}
+                                            </p>
+                                        )}
+                                        {voucherInfo.conditions && (
+                                            <p className="text-white/80">
+                                                <span className="text-yellow-400">📋 Điều kiện:</span> {voucherInfo.conditions}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Email Form */}
+                                    {!emailSent ? (
+                                        <div className="mb-4">
+                                            <p className="text-white/70 text-sm mb-2">Nhận voucher qua email:</p>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="email"
+                                                    value={voucherEmail}
+                                                    onChange={(e) => setVoucherEmail(e.target.value)}
+                                                    placeholder="email@example.com"
+                                                    className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 text-sm"
+                                                />
+                                                <button
+                                                    onClick={handleSendVoucherEmail}
+                                                    disabled={!voucherEmail || sendingEmail}
+                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition text-sm font-medium"
+                                                >
+                                                    {sendingEmail ? '...' : '📧 Gửi'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-4 p-3 bg-green-600/30 rounded-xl border border-green-400/50">
+                                            <p className="text-green-300 text-sm">✅ Đã gửi voucher đến email của bạn!</p>
+                                        </div>
+                                    )}
                                 </>
                             ) : (
                                 <>

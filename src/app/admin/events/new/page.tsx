@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -13,6 +13,14 @@ interface PrizeInput {
     description: string;
     default_weight: string;
     color: string;
+    voucher_campaign_id: string;
+}
+
+interface VoucherCampaign {
+    id: string;
+    name: string;
+    value: number;
+    code: string;
 }
 
 interface RuleInput {
@@ -48,8 +56,22 @@ export default function NewEventPage() {
 
     // Prizes - start empty, let user add prizes
     const [prizes, setPrizes] = useState<PrizeInput[]>([
-        { id: '1', name: 'Không trúng', prize_type: 'no_prize', value: '0', description: '', default_weight: '70', color: '#6B7280' },
+        { id: '1', name: 'Không trúng', prize_type: 'no_prize', value: '0', description: '', default_weight: '70', color: '#6B7280', voucher_campaign_id: '' },
     ]);
+
+    // Voucher Campaigns
+    const [voucherCampaigns, setVoucherCampaigns] = useState<VoucherCampaign[]>([]);
+
+    useEffect(() => {
+        const fetchCampaigns = async () => {
+            const res = await fetch('/api/admin/voucher-campaigns');
+            const data = await res.json();
+            if (data.success) {
+                setVoucherCampaigns(data.data);
+            }
+        };
+        fetchCampaigns();
+    }, []);
 
     const handleNameChange = (value: string) => {
         setName(value);
@@ -77,6 +99,7 @@ export default function NewEventPage() {
                 description: '',
                 default_weight: '10',
                 color: defaultColors[colorIndex],
+                voucher_campaign_id: '',
             },
         ]);
     };
@@ -125,6 +148,7 @@ export default function NewEventPage() {
                         description: p.description,
                         default_weight: p.default_weight,
                         color: p.color,
+                        voucher_campaign_id: p.voucher_campaign_id || null,
                     })),
                 }),
             });
@@ -394,7 +418,29 @@ export default function NewEventPage() {
                                     <option value="discount">Giảm giá</option>
                                     <option value="no_prize">Không trúng</option>
                                 </select>
-                                {prize.prize_type === 'voucher' || prize.prize_type === 'discount' ? (
+                                {prize.prize_type === 'voucher' ? (
+                                    <>
+                                        <select
+                                            value={prize.voucher_campaign_id}
+                                            onChange={(e) => updatePrize(prize.id, 'voucher_campaign_id', e.target.value)}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="">-- Chọn đợt PH --</option>
+                                            {voucherCampaigns.map(c => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.code} - {c.name} ({new Intl.NumberFormat('vi-VN').format(c.value)}đ)
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {prize.voucher_campaign_id && (
+                                            <span className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                                                {new Intl.NumberFormat('vi-VN').format(
+                                                    voucherCampaigns.find(c => c.id === prize.voucher_campaign_id)?.value || 0
+                                                )}đ
+                                            </span>
+                                        )}
+                                    </>
+                                ) : prize.prize_type === 'discount' ? (
                                     <input
                                         type="number"
                                         value={prize.value}

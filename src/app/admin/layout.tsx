@@ -11,7 +11,8 @@ import {
     Gift,
     LogOut,
     Menu,
-    X
+    X,
+    Ticket
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -20,6 +21,8 @@ const navigation = [
     { name: 'Sự kiện', href: '/admin/events', icon: Calendar },
     { name: 'Chi nhánh', href: '/admin/branches', icon: Building2 },
     { name: 'Tồn kho', href: '/admin/inventory', icon: Gift },
+    { name: 'Đợt phát hành', href: '/admin/voucher-campaigns', icon: Ticket },
+    { name: 'Voucher đã PH', href: '/admin/issued-vouchers', icon: Ticket },
     { name: 'Báo cáo', href: '/admin/reports', icon: BarChart3 },
     { name: 'Cài đặt', href: '/admin/settings', icon: Settings },
 ];

@@ -1,5 +1,7 @@
 // KiotViet API Integration
 
+export const KIOTVIET_API_BASE = 'https://public.kiotapi.com';
+
 interface KiotVietTokenResponse {
     access_token: string;
     expires_in: number;
@@ -30,7 +32,7 @@ function getConfig(): KiotVietConfig {
     return { clientId, clientSecret, retailer };
 }
 
-async function getAccessToken(): Promise<string> {
+export async function getKiotVietToken(): Promise<string> {
     // Check cache
     if (tokenCache && Date.now() < tokenCache.expiresAt) {
         return tokenCache.token;
@@ -102,7 +104,7 @@ export interface KiotVietInvoice {
 
 export async function getInvoiceByCode(code: string): Promise<KiotVietInvoice | null> {
     const config = getConfig();
-    const token = await getAccessToken();
+    const token = await getKiotVietToken();
 
     // Use correct endpoint per KiotViet docs: /invoices/code/{code}
     const response = await fetch(
@@ -139,7 +141,7 @@ export interface KiotVietBranch {
 
 export async function getBranches(): Promise<KiotVietBranch[]> {
     const config = getConfig();
-    const token = await getAccessToken();
+    const token = await getKiotVietToken();
 
     const response = await fetch('https://public.kiotapi.com/branches?pageSize=100', {
         headers: {

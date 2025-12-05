@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { selectPrizeWeighted, getPrizeIndex } from '@/lib/spin-logic';
+import { createVoucher, releaseVoucher, generateVoucherCode, calculateExpireDate } from '@/lib/kiotviet-voucher';
 import type { InvoiceSession, EventPrize, BranchPrizeInventory } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -199,6 +200,73 @@ export async function POST(request: NextRequest) {
             (allPrizes || []) as EventPrize[]
         );
 
+        // Handle voucher prizes
+        let voucherInfo = null;
+        if (selectedItem.prize.prize_type === 'voucher' && spinLog) {
+            try {
+                // Get the voucher campaign linked to this prize
+                const { data: prize } = await supabase
+                    .from('event_prizes')
+                    .select('voucher_campaign_id')
+                    .eq('id', selectedItem.prize.id)
+                    .single();
+
+                if (prize?.voucher_campaign_id) {
+                    // Get campaign details
+                    const { data: campaign } = await supabase
+                        .from('voucher_campaigns')
+                        .select('*')
+                        .eq('id', prize.voucher_campaign_id)
+                        .single();
+
+                    if (campaign) {
+                        // Generate and create voucher
+                        const voucherCode = generateVoucherCode('XMAS');
+
+                        // Create voucher in KiotViet
+                        await createVoucher(campaign.kiotviet_campaign_id, voucherCode);
+
+                        // Release voucher
+                        const releaseDate = new Date();
+                        await releaseVoucher(campaign.kiotviet_campaign_id, voucherCode, releaseDate);
+
+                        // Calculate expire date
+                        const expireDate = campaign.expire_days
+                            ? calculateExpireDate(campaign.expire_days, releaseDate)
+                            : campaign.end_date ? new Date(campaign.end_date) : null;
+
+                        // Save to database
+                        const { data: issuedVoucher } = await supabase
+                            .from('issued_vouchers')
+                            .insert({
+                                campaign_id: prize.voucher_campaign_id,
+                                spin_log_id: spinLog.id,
+                                voucher_code: voucherCode,
+                                customer_name: typedSession.customer_name,
+                                customer_phone: typedSession.customer_phone,
+                                value: campaign.value,
+                                release_date: releaseDate.toISOString(),
+                                expire_date: expireDate?.toISOString(),
+                                status: 'issued',
+                            })
+                            .select()
+                            .single();
+
+                        voucherInfo = {
+                            voucher_id: issuedVoucher?.id,
+                            voucher_code: voucherCode,
+                            value: campaign.value,
+                            expire_date: expireDate?.toISOString(),
+                            conditions: campaign.conditions_text,
+                        };
+                    }
+                }
+            } catch (voucherError) {
+                console.error('Voucher creation error:', voucherError);
+                // Continue without voucher info - prize still won
+            }
+        }
+
         return NextResponse.json({
             success: true,
             data: {
@@ -210,6 +278,7 @@ export async function POST(request: NextRequest) {
                     value: selectedItem.prize.value,
                     color: selectedItem.prize.color,
                 },
+                voucher: voucherInfo,
                 remaining_turns: remainingTurns - 1,
                 spin_id: spinLog?.id,
                 prize_index: prizeIndex >= 0 ? prizeIndex : 0,
