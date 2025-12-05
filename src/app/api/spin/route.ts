@@ -252,6 +252,14 @@ export async function POST(request: NextRequest) {
                             .select()
                             .single();
 
+                        // Update spin_log with issued_voucher_id for history lookup
+                        if (issuedVoucher) {
+                            await supabase
+                                .from('spin_logs')
+                                .update({ issued_voucher_id: issuedVoucher.id })
+                                .eq('id', spinLog.id);
+                        }
+
                         voucherInfo = {
                             voucher_id: issuedVoucher?.id,
                             voucher_code: voucherCode,

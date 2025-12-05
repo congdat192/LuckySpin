@@ -45,9 +45,18 @@ interface SpinHistoryItem {
     id: string;
     customer_name: string | null;
     branch_name: string;
+    prize_id?: string;
     prize_name: string;
     prize_type: string;
+    prize_value?: number | null;
+    prize_description?: string | null;
     spun_at: string;
+    voucher?: {
+        code: string;
+        value: number;
+        expire_date: string;
+        conditions: string | null;
+    } | null;
 }
 
 interface HistoryPagination {
@@ -106,6 +115,7 @@ export default function SpinPage() {
     const [history, setHistory] = useState<SpinHistoryItem[]>([]);
     const [historyPage, setHistoryPage] = useState(1);
     const [historyPagination, setHistoryPagination] = useState<HistoryPagination | null>(null);
+    const [selectedHistoryItem, setSelectedHistoryItem] = useState<SpinHistoryItem | null>(null);
 
     // Snowflakes
     const [snowflakes, setSnowflakes] = useState<{ id: number; char: string; style: React.CSSProperties }[]>([]);
@@ -473,12 +483,15 @@ export default function SpinPage() {
                                             <td className="px-3 py-3 text-white/70 hidden sm:table-cell max-w-[80px] truncate">{item.branch_name}</td>
                                             <td className="px-3 py-3 text-white max-w-[80px] truncate">{item.customer_name || 'Khách'}</td>
                                             <td className="px-3 py-3">
-                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium max-w-[100px] truncate ${item.prize_type === 'no_prize'
-                                                    ? 'bg-gray-500/30 text-gray-300'
-                                                    : 'bg-red-500/30 text-yellow-200'
-                                                    }`}>
+                                                <button
+                                                    onClick={() => item.prize_type !== 'no_prize' && setSelectedHistoryItem(item)}
+                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium max-w-[100px] truncate ${item.prize_type === 'no_prize'
+                                                        ? 'bg-gray-500/30 text-gray-300'
+                                                        : 'bg-red-500/30 text-yellow-200 hover:bg-red-500/50 cursor-pointer'
+                                                        }`}
+                                                >
                                                     {item.prize_type === 'no_prize' ? '❄️' : '🎁'} {item.prize_name}
-                                                </span>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -614,6 +627,62 @@ export default function SpinPage() {
                                     </button>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* History Prize Detail Modal */}
+                {selectedHistoryItem && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <div className="bg-gradient-to-b from-red-800 to-green-900 rounded-2xl p-6 max-w-md w-full text-center border-4 border-yellow-400 shadow-2xl">
+                            <div className="text-5xl mb-4">🎁</div>
+                            <h3 className="text-2xl font-bold text-yellow-300 mb-2">
+                                {selectedHistoryItem.prize_name}
+                            </h3>
+
+                            {selectedHistoryItem.voucher ? (
+                                <>
+                                    <div className="bg-yellow-400 text-gray-900 px-6 py-4 rounded-xl my-4 shadow-lg">
+                                        <p className="text-sm text-gray-700 mb-1">Mã Voucher</p>
+                                        <p className="text-2xl font-bold tracking-wider">
+                                            {selectedHistoryItem.voucher.code}
+                                        </p>
+                                    </div>
+                                    <p className="text-xl font-bold text-white mb-3">
+                                        Trị giá: {new Intl.NumberFormat('vi-VN').format(selectedHistoryItem.voucher.value)}đ
+                                    </p>
+                                    <div className="text-left bg-white/10 rounded-lg p-4 text-sm text-white/80 space-y-2">
+                                        <p>
+                                            <span className="text-yellow-300">📅 Hết hạn:</span>{' '}
+                                            {new Date(selectedHistoryItem.voucher.expire_date).toLocaleDateString('vi-VN')}
+                                        </p>
+                                        {selectedHistoryItem.voucher.conditions && (
+                                            <p>
+                                                <span className="text-yellow-300">📋 Điều kiện:</span>{' '}
+                                                {selectedHistoryItem.voucher.conditions}
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-white/80 my-4">
+                                    {selectedHistoryItem.prize_type === 'physical' && selectedHistoryItem.prize_description && (
+                                        <p>{selectedHistoryItem.prize_description}</p>
+                                    )}
+                                    {selectedHistoryItem.prize_value && (
+                                        <p className="text-xl font-bold text-white mt-2">
+                                            Trị giá: {new Intl.NumberFormat('vi-VN').format(selectedHistoryItem.prize_value)}đ
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => setSelectedHistoryItem(null)}
+                                className="mt-4 w-full px-6 py-3 bg-white/20 text-white font-medium rounded-xl hover:bg-white/30 transition"
+                            >
+                                Đóng
+                            </button>
                         </div>
                     </div>
                 )}
