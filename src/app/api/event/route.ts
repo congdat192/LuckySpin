@@ -61,6 +61,8 @@ export async function GET(request: NextRequest) {
                     image_url: p.image_url,
                     type: p.prize_type,
                     color: p.color,
+                    text_color: p.text_color || '#ffffff',
+                    text_effect: p.text_effect || 'none',
                 })),
             },
         });

@@ -14,6 +14,8 @@ interface PrizeInput {
     description: string;
     default_weight: string;
     color: string;
+    text_color: string;
+    text_effect: 'none' | 'shadow' | 'outline' | 'glow' | 'gold';
     voucher_campaign_id: string;
     image_url: string;
 }
@@ -69,6 +71,9 @@ export default function EditEventPage() {
     // Voucher Campaigns
     const [voucherCampaigns, setVoucherCampaigns] = useState<VoucherCampaign[]>([]);
 
+    // Prize display mode
+    const [prizeDisplayMode, setPrizeDisplayMode] = useState<'both' | 'image' | 'text'>('both');
+
     useEffect(() => {
         const fetchEvent = async () => {
             try {
@@ -83,6 +88,11 @@ export default function EditEventPage() {
                     setStartDate(event.start_date?.split('T')[0] || '');
                     setEndDate(event.end_date?.split('T')[0] || '');
                     setStatus(event.status || 'draft');
+
+                    // Load theme config
+                    if (event.theme_config?.prize_display_mode) {
+                        setPrizeDisplayMode(event.theme_config.prize_display_mode);
+                    }
 
                     // Load rules
                     if (event.event_rules && event.event_rules.length > 0) {
@@ -100,7 +110,7 @@ export default function EditEventPage() {
 
                     // Load prizes
                     if (event.event_prizes && event.event_prizes.length > 0) {
-                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string; voucher_campaign_id?: string; image_url?: string }) => ({
+                        setPrizes(event.event_prizes.map((p: { id: string; name: string; prize_type: string; value: number; description: string; default_weight: number; color: string; text_color?: string; text_effect?: string; voucher_campaign_id?: string; image_url?: string }) => ({
                             id: p.id,
                             name: p.name || '',
                             prize_type: p.prize_type || 'voucher',
@@ -108,6 +118,8 @@ export default function EditEventPage() {
                             description: p.description || '',
                             default_weight: String(p.default_weight || 0),
                             color: p.color || '#3B82F6',
+                            text_color: p.text_color || '#ffffff',
+                            text_effect: (p.text_effect as PrizeInput['text_effect']) || 'none',
                             voucher_campaign_id: p.voucher_campaign_id || '',
                             image_url: p.image_url || '',
                         })));
@@ -143,6 +155,8 @@ export default function EditEventPage() {
                 description: '',
                 default_weight: '10',
                 color: defaultColors[colorIndex],
+                text_color: '#ffffff',
+                text_effect: 'none',
                 voucher_campaign_id: '',
                 image_url: '',
             },
@@ -214,6 +228,9 @@ export default function EditEventPage() {
                     start_date: startDate,
                     end_date: endDate,
                     status,
+                    theme_config: {
+                        prize_display_mode: prizeDisplayMode,
+                    },
                     rules: {
                         min_invoice_total: rules.min_invoice_total,
                         turn_formula_type: rules.turn_formula_type,
@@ -228,6 +245,8 @@ export default function EditEventPage() {
                         description: p.description,
                         default_weight: p.default_weight,
                         color: p.color,
+                        text_color: p.text_color,
+                        text_effect: p.text_effect,
                         voucher_campaign_id: p.voucher_campaign_id || null,
                         image_url: p.image_url || null,
                     })),
@@ -481,7 +500,21 @@ export default function EditEventPage() {
                 {/* Prizes */}
                 <section className="bg-white rounded-xl border border-gray-200 p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-gray-900">Danh sách quà</h2>
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Danh sách quà</h2>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs text-gray-500">Hiển thị:</label>
+                                <select
+                                    value={prizeDisplayMode}
+                                    onChange={(e) => setPrizeDisplayMode(e.target.value as 'both' | 'image' | 'text')}
+                                    className="text-xs px-2 py-1 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="both">Ảnh + Text</option>
+                                    <option value="image">Chỉ ảnh</option>
+                                    <option value="text">Chỉ text</option>
+                                </select>
+                            </div>
+                        </div>
                         <button
                             type="button"
                             onClick={addPrize}
@@ -507,26 +540,39 @@ export default function EditEventPage() {
                         {prizes.map((prize) => (
                             <div
                                 key={prize.id}
-                                className="grid grid-cols-[50px_40px_140px_100px_1fr_80px_40px] gap-2 items-center p-2 bg-gray-50 rounded-lg"
+                                className="grid grid-cols-[50px_40px_40px_80px_140px_100px_1fr_80px_40px] gap-2 items-center p-2 bg-gray-50 rounded-lg"
                             >
                                 {/* Image Upload */}
-                                <div className="relative">
+                                <div className="relative group">
                                     {prize.image_url ? (
-                                        <div className="relative w-10 h-10 group">
+                                        <div className="relative w-12 h-12">
                                             <Image
                                                 src={prize.image_url}
                                                 alt={prize.name}
-                                                width={40}
-                                                height={40}
-                                                className="w-10 h-10 object-cover rounded-lg border border-gray-300"
+                                                width={48}
+                                                height={48}
+                                                className="w-12 h-12 object-cover rounded-lg border border-gray-300 cursor-pointer transition hover:opacity-80"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => removeImage(prize.id)}
-                                                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-md"
                                             >
                                                 <X className="w-3 h-3" />
                                             </button>
+                                            {/* Hover Preview */}
+                                            <div className="hidden group-hover:block absolute left-full ml-2 top-0 z-50 pointer-events-none">
+                                                <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-1">
+                                                    <Image
+                                                        src={prize.image_url}
+                                                        alt={prize.name}
+                                                        width={120}
+                                                        height={120}
+                                                        className="w-28 h-28 object-cover rounded-lg"
+                                                    />
+                                                    <p className="text-xs text-center text-gray-500 mt-1 px-1 truncate max-w-28">{prize.name || 'Ảnh quà'}</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     ) : (
                                         <label className="w-10 h-10 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
@@ -549,12 +595,43 @@ export default function EditEventPage() {
                                     )}
                                 </div>
 
-                                <input
-                                    type="color"
-                                    value={prize.color}
-                                    onChange={(e) => updatePrize(prize.id, 'color', e.target.value)}
-                                    className="w-8 h-8 rounded cursor-pointer"
-                                />
+                                {/* Segment Color */}
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <input
+                                        type="color"
+                                        value={prize.color}
+                                        onChange={(e) => updatePrize(prize.id, 'color', e.target.value)}
+                                        className="w-8 h-6 rounded cursor-pointer"
+                                        title="Màu segment"
+                                    />
+                                    <span className="text-[9px] text-gray-400">Nền</span>
+                                </div>
+
+                                {/* Text Color */}
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <input
+                                        type="color"
+                                        value={prize.text_color}
+                                        onChange={(e) => updatePrize(prize.id, 'text_color', e.target.value)}
+                                        className="w-8 h-6 rounded cursor-pointer"
+                                        title="Màu chữ"
+                                    />
+                                    <span className="text-[9px] text-gray-400">Chữ</span>
+                                </div>
+
+                                {/* Text Effect */}
+                                <select
+                                    value={prize.text_effect}
+                                    onChange={(e) => updatePrize(prize.id, 'text_effect', e.target.value)}
+                                    className="w-20 px-1 py-1 border border-gray-300 rounded text-xs"
+                                    title="Hiệu ứng chữ"
+                                >
+                                    <option value="none">Thường</option>
+                                    <option value="shadow">Đổ bóng</option>
+                                    <option value="outline">Viền đen</option>
+                                    <option value="glow">Phát sáng</option>
+                                    <option value="gold">Vàng kim</option>
+                                </select>
                                 <input
                                     type="text"
                                     value={prize.name}

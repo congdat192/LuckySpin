@@ -74,6 +74,8 @@ export interface EventPrize {
     default_weight: number;
     display_order: number;
     color: string;
+    text_color?: string;
+    text_effect?: 'none' | 'shadow' | 'outline' | 'glow' | 'gold';
     metadata: Record<string, unknown>;
     is_active: boolean;
     created_at: string;

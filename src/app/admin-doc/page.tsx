@@ -267,6 +267,24 @@ export default function AdminDocPage() {
                                         <strong>Mới:</strong> Bạn có thể upload hình ảnh cho từng phần quà để hiển thị trên vòng quay đẹp mắt hơn.
                                     </p>
                                 </div>
+
+                                <div className="mt-6 border-t border-gray-100 pt-4">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-3">4. Tùy biến Vòng quay (Mới)</h3>
+                                    <p className="text-gray-600 mb-2">Để vòng quay thêm sinh động, bạn có thể tùy chỉnh:</p>
+                                    <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
+                                        <li>
+                                            <strong>Màu chữ & Hiệu ứng:</strong> Chọn màu chữ và hiệu ứng (Đổ bóng, Viền đen, Phát sáng, Vàng kim) cho từng phần quà để nổi bật trên nền màu.
+                                        </li>
+                                        <li>
+                                            <strong>Chế độ hiển thị:</strong> Tại danh sách quà, chọn chế độ hiển thị trên vòng quay:
+                                            <ul className="list-circle list-inside ml-6 mt-1 text-sm">
+                                                <li><em>Ảnh + Text:</em> Hiển thị cả hình ảnh và tên quà (Mặc định).</li>
+                                                <li><em>Chỉ ảnh:</em> Hình ảnh sẽ to hơn, ẩn tên quà.</li>
+                                                <li><em>Chỉ text:</em> Chỉ hiện tên quà, ẩn hình ảnh.</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -284,13 +302,26 @@ export default function AdminDocPage() {
                         </p>
                         <div className="bg-white border border-gray-200 rounded-xl p-6">
                             <h3 className="font-bold text-gray-900 mb-4">Các bước nhập kho:</h3>
-                            <ol className="list-decimal list-inside space-y-3 text-gray-600">
-                                <li>Vào menu <strong>Kho quà</strong>.</li>
-                                <li>Chọn sự kiện đang diễn ra.</li>
-                                <li>Hệ thống hiển thị bảng ma trận: <strong>Hàng dọc</strong> là Chi nhánh, <strong>Hàng ngang</strong> là Quà tặng.</li>
-                                <li>Nhập số lượng quà cho từng chi nhánh vào các ô tương ứng.</li>
-                                <li>Nhấn <strong>Lưu thay đổi</strong>.</li>
-                            </ol>
+                            <div className="space-y-6">
+                                <div>
+                                    <h4 className="font-semibold text-gray-800 mb-2">Cách 1: Nhập trực tiếp</h4>
+                                    <ol className="list-decimal list-inside space-y-2 text-gray-600 text-sm">
+                                        <li>Vào menu <strong>Kho quà</strong> → Chọn sự kiện.</li>
+                                        <li>Nhập số lượng vào các ô trong bảng ma trận.</li>
+                                        <li>Nhấn <strong>Lưu thay đổi</strong>.</li>
+                                    </ol>
+                                </div>
+
+                                <div className="pt-4 border-t border-gray-100">
+                                    <h4 className="font-semibold text-gray-800 mb-2">Cách 2: Nhập bằng Excel (Mới)</h4>
+                                    <ol className="list-decimal list-inside space-y-2 text-gray-600 text-sm">
+                                        <li>Nhấn nút <strong>Xuất Excel</strong> để tải file mẫu hiện tại về máy.</li>
+                                        <li>Chỉnh sửa số lượng tồn kho trong file Excel (Không sửa ID/Tên).</li>
+                                        <li>Nhấn <strong>Nhập Excel</strong> và chọn file vừa sửa.</li>
+                                        <li>Kiểm tra lại dữ liệu ở bảng xem trước và nhấn <strong>Xác nhận nhập</strong>.</li>
+                                    </ol>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Prize Mechanism */}

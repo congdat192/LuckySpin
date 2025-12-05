@@ -4,7 +4,9 @@ Hệ thống vòng quay may mắn đa sự kiện, tích hợp KiotViet API cho 
 
 ## ✨ Tính năng
 
-- 🎄 **Christmas Theme**: Giao diện Giáng sinh với tuyết rơi, đèn nháy
+- 🎄 **Christmas Theme**: Giao diện Giáng sinh với tuyết rơi, đèn nháy, viền vàng sang trọng
+- 🎨 **Spin Wheel Customization**: Tùy chỉnh màu chữ, hiệu ứng text, chế độ hiển thị (Ảnh/Text)
+- 📊 **Excel Inventory**: Nhập/Xuất kho quà nhanh chóng bằng file Excel
 - 🎯 **Multi-event**: Hỗ trợ nhiều sự kiện (Noel, Tết, Khai trương...)
 - 🏪 **Multi-branch**: Quản lý chi nhánh với inventory riêng, đồng bộ từ KiotViet
 - 🎁 **Flexible prizes**: Voucher, quà vật lý, giảm giá, không trúng

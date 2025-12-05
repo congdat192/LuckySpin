@@ -43,7 +43,7 @@ export async function PUT(
 ) {
     try {
         const body = await request.json();
-        const { name, slug, description, start_date, end_date, status, prizes, rules } = body;
+        const { name, slug, description, start_date, end_date, status, prizes, rules, theme_config } = body;
 
         const supabase = createAdminClient();
 
@@ -55,6 +55,7 @@ export async function PUT(
         if (start_date !== undefined) updateData.start_date = start_date;
         if (end_date !== undefined) updateData.end_date = end_date;
         if (status !== undefined) updateData.status = status;
+        if (theme_config !== undefined) updateData.theme_config = theme_config;
 
         const { data: event, error } = await supabase
             .from('events')
@@ -102,6 +103,8 @@ export async function PUT(
                     description?: string;
                     default_weight?: string;
                     color: string;
+                    text_color?: string;
+                    text_effect?: string;
                     voucher_campaign_id?: string | null;
                     image_url?: string | null;
                 };
@@ -113,6 +116,8 @@ export async function PUT(
                     description: p.description || null,
                     default_weight: parseInt(p.default_weight || '10') || 10,
                     color: p.color,
+                    text_color: p.text_color || '#ffffff',
+                    text_effect: p.text_effect || 'none',
                     display_order: idx,
                     voucher_campaign_id: p.voucher_campaign_id || null,
                     image_url: p.image_url || null,

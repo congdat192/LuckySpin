@@ -10,6 +10,8 @@ interface Prize {
     name: string;
     color: string;
     image_url?: string | null;
+    text_color?: string;
+    text_effect?: 'none' | 'shadow' | 'outline' | 'glow' | 'gold';
     type: string;
 }
 
@@ -21,6 +23,7 @@ interface EventData {
     theme_config?: {
         background_color?: string;
         primary_color?: string;
+        prize_display_mode?: 'both' | 'image' | 'text';
     };
 }
 
@@ -432,6 +435,7 @@ export default function SpinPage() {
                             onSpinComplete={handleSpinComplete}
                             canSpin={!!session && session.remaining_turns > 0 && !showResult}
                             onSpin={handleSpin}
+                            prizeDisplayMode={event.theme_config?.prize_display_mode || 'both'}
                         />
                     </div>
 

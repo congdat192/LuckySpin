@@ -7,6 +7,8 @@ interface Prize {
     name: string;
     color: string;
     image_url?: string | null;
+    text_color?: string;
+    text_effect?: 'none' | 'shadow' | 'outline' | 'glow' | 'gold';
 }
 
 interface SpinWheelProps {
@@ -16,6 +18,7 @@ interface SpinWheelProps {
     onSpinComplete: () => void;
     canSpin?: boolean;
     onSpin?: () => void;
+    prizeDisplayMode?: 'both' | 'image' | 'text';
 }
 
 export default function SpinWheel({
@@ -25,6 +28,7 @@ export default function SpinWheel({
     onSpinComplete,
     canSpin = false,
     onSpin,
+    prizeDisplayMode = 'both',
 }: SpinWheelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [currentRotation, setCurrentRotation] = useState(0);
@@ -87,18 +91,8 @@ export default function SpinWheel({
             const startAngle = (index * segmentAngle - 90 + currentRotation) * (Math.PI / 180);
             const endAngle = ((index + 1) * segmentAngle - 90 + currentRotation) * (Math.PI / 180);
 
-            // Segment - use Christmas colors instead of prize.color
-            const christmasColors = [
-                '#c41e3a', // Christmas red
-                '#165b33', // Christmas green  
-                '#bb2528', // Candy red
-                '#146b3a', // Holly green
-                '#d4af37', // Gold
-                '#8b0000', // Dark red
-                '#228b22', // Forest green
-                '#b8860b', // Dark gold
-            ];
-            const segmentColor = christmasColors[index % christmasColors.length];
+            // Segment - use prize.color from admin settings
+            const segmentColor = prize.color || '#3B82F6';
 
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
@@ -106,20 +100,23 @@ export default function SpinWheel({
             ctx.closePath();
             ctx.fillStyle = segmentColor;
             ctx.fill();
-            ctx.strokeStyle = '#ffd700';
+            ctx.strokeStyle = '#8B4513';  // Saddle brown - less yellow
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Draw image if available
+            // Draw image if available and mode allows
             const prizeImage = loadedImages.get(prize.id);
-            if (prizeImage) {
+            const showImage = prizeDisplayMode === 'both' || prizeDisplayMode === 'image';
+            const showText = prizeDisplayMode === 'both' || prizeDisplayMode === 'text';
+
+            if (prizeImage && showImage) {
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.rotate(startAngle + (segmentAngle / 2) * (Math.PI / 180));
 
-                // Draw image at center of segment
-                const imgSize = 30;
-                const imgX = radius * 0.6 - imgSize / 2;
+                // Draw image - larger if no text, adjust position
+                const imgSize = showText ? 30 : 45;
+                const imgX = showText ? radius * 0.6 - imgSize / 2 : radius * 0.55 - imgSize / 2;
                 const imgY = -imgSize / 2;
 
                 // Clip to circle
@@ -130,40 +127,77 @@ export default function SpinWheel({
                 ctx.restore();
             }
 
-            // Text
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(startAngle + (segmentAngle / 2) * (Math.PI / 180));
-            ctx.textAlign = 'right';
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 14px Arial';
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 3;
+            // Text - only if mode allows
+            if (showText) {
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + (segmentAngle / 2) * (Math.PI / 180));
+                ctx.textAlign = 'right';
+                ctx.font = 'bold 14px Arial';
 
-            // Truncate long text - adjust position if image exists
-            const text = prize.name.length > 15 ? prize.name.slice(0, 12) + '...' : prize.name;
-            const textX = prizeImage ? radius - 50 : radius - 20;
-            ctx.fillText(text, textX, 5);
-            ctx.restore();
+                // Apply text effect
+                const textEffect = prize.text_effect || 'none';
+                const textColor = prize.text_color || '#ffffff';
+
+                switch (textEffect) {
+                    case 'shadow':
+                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                        ctx.shadowBlur = 6;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                        ctx.fillStyle = textColor;
+                        break;
+                    case 'outline':
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 3;
+                        ctx.fillStyle = textColor;
+                        break;
+                    case 'glow':
+                        ctx.shadowColor = textColor;
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = textColor;
+                        break;
+                    case 'gold':
+                        ctx.shadowColor = 'rgba(255,215,0,0.8)';
+                        ctx.shadowBlur = 8;
+                        ctx.fillStyle = '#FFD700';
+                        break;
+                    default:
+                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                        ctx.shadowBlur = 3;
+                        ctx.fillStyle = textColor;
+                }
+
+                // Truncate long text - adjust position if image exists
+                const text = prize.name.length > 15 ? prize.name.slice(0, 12) + '...' : prize.name;
+                const textX = (prizeImage && showImage) ? radius - 50 : radius - 20;
+
+                // Draw outline first if needed
+                if (textEffect === 'outline') {
+                    ctx.strokeText(text, textX, 5);
+                }
+                ctx.fillText(text, textX, 5);
+                ctx.restore();
+            }
         });
 
         // Center circle
         ctx.beginPath();
         ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
-        ctx.fillStyle = '#1f2937';
+        ctx.fillStyle = '#7f1d1d';  // Dark red
         ctx.fill();
-        ctx.strokeStyle = '#fbbf24';
+        ctx.strokeStyle = '#fde68a';  // Light gold
         ctx.lineWidth = 4;
         ctx.stroke();
 
         // Center text
-        ctx.fillStyle = '#fbbf24';
-        ctx.font = 'bold 12px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('QUAY', centerX, centerY - 5);
         ctx.fillText('NGAY', centerX, centerY + 12);
 
-    }, [prizes, currentRotation, segmentAngle, loadedImages]);
+    }, [prizes, currentRotation, segmentAngle, loadedImages, prizeDisplayMode]);
 
     // Spin animation
     useEffect(() => {
@@ -278,9 +312,9 @@ export default function SpinWheel({
                         className={`w-24 h-24 rounded-full font-bold text-sm
                             flex items-center justify-center text-center
                             transition-all duration-300
-                            bg-gradient-to-b from-red-600 to-red-800 text-white border-4 border-yellow-400 shadow-lg
+                            bg-gradient-to-b from-red-700 to-red-900 text-white border-4 border-amber-200 shadow-lg
                             ${canSpin && !isSpinning
-                                ? 'shadow-yellow-400/50 animate-pulse-glow cursor-pointer hover:scale-105'
+                                ? 'shadow-amber-200/50 animate-pulse-glow cursor-pointer hover:scale-105'
                                 : isSpinning
                                     ? 'cursor-wait opacity-80'
                                     : 'cursor-pointer'
@@ -294,9 +328,9 @@ export default function SpinWheel({
                     </button>
                 </div>
 
-                {/* Outer ring decoration - gold */}
-                <div className="absolute inset-0 rounded-full border-[6px] sm:border-8 border-yellow-500 pointer-events-none shadow-[0_0_30px_rgba(234,179,8,0.4)] z-10" />
-                <div className="absolute inset-2 rounded-full border-2 sm:border-4 border-yellow-600/40 pointer-events-none z-10" />
+                {/* Outer ring decoration - warm bronze */}
+                <div className="absolute inset-0 rounded-full border-[6px] sm:border-8 border-amber-300 pointer-events-none shadow-[0_0_20px_rgba(180,83,9,0.3)] z-10" />
+                <div className="absolute inset-2 rounded-full border-2 sm:border-4 border-amber-700/40 pointer-events-none z-10" />
             </div>
 
             {/* Christmas lights around the wheel */}

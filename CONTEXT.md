@@ -26,7 +26,7 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 1. **events** - Sự kiện (Noel, Tết...)
 2. **branches** - Chi nhánh cửa hàng (sync từ KiotViet)
 3. **event_rules** - Điều kiện tham gia + công thức tính lượt
-4. **event_prizes** - Danh sách quà của sự kiện
+4. **event_prizes** - Danh sách quà (thêm `text_color`, `text_effect`)
 5. **branch_prize_inventory** - Tồn kho quà theo chi nhánh + event
 6. **invoice_sessions** - Phiên hóa đơn đã validate
 7. **spin_logs** - Lịch sử quay thưởng
@@ -37,7 +37,7 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 
 | Endpoint | Method | Mô tả |
 |----------|--------|-------|
-| `/api/event` | GET | Lấy sự kiện active + prizes |
+| `/api/event` | GET | Lấy sự kiện active + prizes (kèm style) |
 | `/api/invoice/validate` | POST | Xác thực hóa đơn với KiotViet |
 | `/api/spin` | POST | Thực hiện quay thưởng |
 | `/api/spin/history` | GET | Lịch sử quay (phân trang) |
@@ -49,11 +49,11 @@ Lucky Spin là hệ thống vòng quay may mắn cho chuỗi cửa hàng, tích 
 | `/api/admin/auth` | POST/DELETE | Login/Logout |
 | `/api/admin/dashboard` | GET | Stats dashboard |
 | `/api/admin/events` | GET/POST | CRUD events |
-| `/api/admin/events/[id]` | GET/PUT/DELETE | Single event |
+| `/api/admin/events/[id]` | GET/PUT/DELETE | Single event (update theme_config) |
 | `/api/admin/branches` | GET/POST | CRUD branches |
 | `/api/admin/branches/[id]` | GET/PUT/DELETE | Single branch |
 | `/api/admin/branches/sync` | POST | Sync từ KiotViet |
-| `/api/admin/inventory` | GET/POST | Quản lý tồn kho |
+| `/api/admin/inventory` | GET/POST | Quản lý tồn kho (Import/Export Excel) |
 | `/api/admin/reports` | GET | Báo cáo chi tiết |
 
 ## Authentication
@@ -121,6 +121,16 @@ Environment Variables cần set:
 
 ## Recent Updates (Dec 2024)
 
+### Spin Wheel Redesign
+- 🎨 **Christmas Theme**: Viền vàng gradient, đèn nháy, nút quay đỏ
+- ✨ **Text Styling**: Tùy chỉnh màu chữ, hiệu ứng (Shadow, Outline, Glow, Gold) cho từng quà
+- 🖼️ **Display Mode**: Tùy chọn hiển thị (Ảnh + Text, Chỉ Ảnh, Chỉ Text)
+- 📱 **Responsive**: Tối ưu hiển thị trên mobile
+
+### Inventory Management
+- 📊 **Excel Import/Export**: Hỗ trợ nhập xuất kho bằng file Excel
+- 👁️ **Preview Import**: Xem trước dữ liệu trước khi lưu vào database
+
 ### Voucher Integration
 - 🎫 KiotViet Voucher API integration - auto issue vouchers on win
 - 📧 Send voucher to customer email via Resend
@@ -129,7 +139,6 @@ Environment Variables cần set:
 - 📋 Voucher code format: XM + 6 random chars (e.g., XM3K7N2P)
 
 ### UI/UX
-- 🎄 Christmas Theme: gradient đỏ/xanh, tuyết rơi, cây thông
 - 🎡 Nút quay ở giữa vòng quay với glow animation
 - 📱 Bottom sheet cho kết quả (không che vòng quay)
 - 🎯 Vòng quay luôn dừng chính xác giữa ô quà
