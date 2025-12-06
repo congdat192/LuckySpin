@@ -85,7 +85,7 @@ export default function InvoiceForm({ onValidated, disabled }: InvoiceFormProps)
                         type="text"
                         value={invoiceCode}
                         onChange={(e) => setInvoiceCode(e.target.value.toUpperCase())}
-                        placeholder="Nhập mã hóa đơn"
+                        placeholder="Ví dụ: HD232323"
                         disabled={disabled || loading}
                         className="w-full px-4 py-3 pr-28 text-base font-mono bg-white/10 backdrop-blur border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 disabled:opacity-50"
                     />

@@ -300,7 +300,7 @@ export default function SpinWheel({
                     {/* Tooltip */}
                     {showTooltip && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg animate-fade-in">
-                            Nhập mã hóa đơn để tra cứu lượt quay
+                            Nhập mã hóa đơn để nhận quà
                             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
                         </div>
                     )}
@@ -313,14 +313,14 @@ export default function SpinWheel({
                                 setTimeout(() => setShowTooltip(false), 2000);
                             }
                         }}
-                        className={`w-24 h-24 rounded-full font-bold text-sm
+                        className={`w-20 h-20 rounded-full font-bold text-sm
                             flex items-center justify-center text-center
                             transition-all duration-300
                             bg-gradient-to-b from-red-700 to-red-900 text-white border-4 border-amber-200 shadow-lg
                             ${canSpin && !isSpinning
                                 ? 'shadow-amber-200/50 animate-pulse-glow cursor-pointer hover:scale-105'
                                 : isSpinning
-                                    ? 'cursor-wait opacity-80'
+                                    ? 'cursor-wait animate-spin-glow scale-110 border-yellow-300'
                                     : 'cursor-pointer'
                             }`}
                     >
@@ -373,6 +373,17 @@ export default function SpinWheel({
                 }
                 .animate-pulse-glow {
                     animation: pulse-glow 1.5s ease-in-out infinite;
+                }
+                @keyframes spin-glow {
+                    0%, 100% { 
+                        box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.5), 0 0 75px rgba(255, 215, 0, 0.3);
+                    }
+                    50% { 
+                        box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.7), 0 0 100px rgba(255, 215, 0, 0.5);
+                    }
+                }
+                .animate-spin-glow {
+                    animation: spin-glow 0.5s ease-in-out infinite;
                 }
                 @keyframes twinkle {
                     0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }

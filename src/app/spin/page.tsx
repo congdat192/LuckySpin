@@ -376,48 +376,31 @@ export default function SpinPage() {
                 {!session ? (
                     <div className="mb-6">
                         <p className="text-center text-sm sm:text-base text-yellow-100 mb-3">
-                            🎁 Nhập mã hóa đơn để nhận quà 🎁
+                            🎁 Nhập mã hóa đơn để tra cứu 🎁
                         </p>
                         <InvoiceForm onValidated={handleValidated} />
                     </div>
                 ) : (
                     <div className="mb-6">
-                        {/* Tra cứu lại button */}
-                        <div className="flex justify-end mb-2">
+                        {/* Compact customer info with inline reset button */}
+                        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-white/10 backdrop-blur rounded-lg px-4 py-2 border border-yellow-400/30 text-xs sm:text-sm">
+                            <span className="text-yellow-200 font-semibold">🎅 {session.customer.name || 'Khách hàng'}</span>
+                            <span className="text-white/40">|</span>
+                            <span className="text-white font-mono">{session.invoice_code}</span>
+                            <span className="text-white/40">|</span>
+                            <span className="text-green-300 font-semibold">{new Intl.NumberFormat('vi-VN').format(session.invoice_total)}đ</span>
+                            <span className="text-white/40">|</span>
+                            <span className="text-white">{session.branch.name}</span>
+                            <span className="text-white/40">|</span>
+                            <span className="text-yellow-300 font-bold">🎁 {session.remaining_turns} lượt</span>
+                            <span className="text-white/40">|</span>
                             <button
                                 onClick={handleNewInvoice}
-                                className="text-white/70 hover:text-white text-xs flex items-center gap-1 transition"
+                                className="text-white/70 hover:text-white flex items-center gap-1 transition"
                             >
                                 <RotateCcw className="w-3 h-3" />
                                 <span>Tra cứu lại</span>
                             </button>
-                        </div>
-                        {/* Customer info card */}
-                        <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/10 backdrop-blur rounded-xl px-6 py-4 border border-yellow-400/30 w-full">
-                            <div className="text-sm text-white/70">
-                                <span className="text-yellow-200 font-semibold">🎅 {session.customer.name || 'Khách hàng'}</span>
-                            </div>
-                            <div className="h-6 w-px bg-white/20 hidden sm:block" />
-                            <div className="text-sm">
-                                <span className="text-white/60">HD:</span>{' '}
-                                <span className="text-white font-mono">{session.invoice_code}</span>
-                            </div>
-                            <div className="h-6 w-px bg-white/20 hidden sm:block" />
-                            <div className="text-sm">
-                                <span className="text-white/60">Giá trị:</span>{' '}
-                                <span className="text-green-300 font-semibold">
-                                    {new Intl.NumberFormat('vi-VN').format(session.invoice_total)}đ
-                                </span>
-                            </div>
-                            <div className="h-6 w-px bg-white/20 hidden sm:block" />
-                            <div className="text-sm">
-                                <span className="text-white/60">CN:</span>{' '}
-                                <span className="text-white">{session.branch.name}</span>
-                            </div>
-                            <div className="h-6 w-px bg-white/20" />
-                            <div className="text-yellow-300 font-bold">
-                                🎁 {session.remaining_turns} lượt
-                            </div>
                         </div>
                     </div>
                 )}
@@ -535,163 +518,289 @@ export default function SpinPage() {
 
                 {/* Result Modal - Bottom Sheet */}
                 {showResult && wonPrize && (
-                    <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
-                        <div className="bg-gradient-to-b from-red-800 to-green-900 rounded-t-3xl p-6 max-w-md mx-auto text-center border-t-4 border-x-4 border-yellow-400 shadow-2xl">
-                            {wonPrize.type === 'no_prize' ? (
-                                <>
-                                    <div className="text-6xl mb-4">❄️</div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">Chúc bạn may mắn lần sau!</h3>
-                                    <p className="text-white/70 mb-6">🎄 Hãy thử lại với hóa đơn khác nhé 🎄</p>
-                                </>
-                            ) : wonPrize.type === 'voucher' && voucherInfo ? (
-                                <>
-                                    <div className="text-5xl mb-3">🎫</div>
-                                    <h3 className="text-xl font-bold text-yellow-300 mb-2">🎅 Chúc mừng Giáng sinh! 🎅</h3>
-                                    <p className="text-lg font-semibold text-white mb-3">{wonPrize.name}</p>
+                    <div
+                        className="fixed inset-0 z-50 flex items-end justify-center bg-[#1a472a]/90"
+                        onClick={(e) => e.target === e.currentTarget && (session && session.remaining_turns > 0 ? handlePlayAgain() : handleNewInvoice())}
+                    >
+                        <div className="w-full max-w-md mx-auto animate-slide-up">
+                            {/* Main modal with green gradient header */}
+                            <div className="bg-gradient-to-b from-green-100 via-white to-white rounded-t-3xl overflow-hidden shadow-2xl relative">
+                                {/* Close button */}
+                                <button
+                                    onClick={session && session.remaining_turns > 0 ? handlePlayAgain : handleNewInvoice}
+                                    className="absolute top-3 right-3 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition z-10"
+                                >
+                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
 
-                                    {/* Voucher Code Display */}
-                                    <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-4 mb-4">
-                                        <p className="text-sm text-yellow-900 mb-1">Mã voucher của bạn</p>
-                                        <div className="flex items-center justify-center gap-2">
-                                            <p className="text-2xl font-bold text-white tracking-widest">
-                                                {voucherInfo.voucher_code}
-                                            </p>
-                                            <button
-                                                onClick={() => navigator.clipboard.writeText(voucherInfo.voucher_code)}
-                                                className="p-1.5 bg-white/20 rounded-lg hover:bg-white/30 transition"
-                                                title="Sao chép mã"
-                                            >
-                                                📋
-                                            </button>
-                                        </div>
+                                {/* Corner decorations */}
+                                <div className="absolute top-3 left-3 text-2xl">🎄</div>
+                                <div className="absolute top-2 right-14 text-lg">❄️</div>
+
+                                {/* Content */}
+                                <div className="p-6 pt-10">
+                                    {/* Header */}
+                                    <div className="text-center mb-5">
+                                        <p className="text-gray-600 text-sm mb-2">🎄Mắt Kính Tâm Đức</p>
+                                        <h2 className="text-2xl font-bold italic mb-2">
+                                            <span className="text-red-500">MERRY</span>{' '}
+                                            <span className="text-green-600">CHRISTMAS</span>{' '}
+                                            <span>🎄</span>
+                                        </h2>
                                     </div>
 
-                                    {/* Voucher Details */}
-                                    <div className="text-left bg-white/10 rounded-xl p-3 mb-4 text-sm">
-                                        <p className="text-white mb-1">
-                                            <span className="text-yellow-400">💰 Giá trị:</span> {new Intl.NumberFormat('vi-VN').format(voucherInfo.value)}đ
-                                        </p>
-                                        {voucherInfo.expire_date && (
-                                            <p className="text-white mb-1">
-                                                <span className="text-yellow-400">📅 Hết hạn:</span> {new Date(voucherInfo.expire_date).toLocaleDateString('vi-VN')}
-                                            </p>
-                                        )}
-                                        {voucherInfo.conditions && (
-                                            <p className="text-white/80">
-                                                <span className="text-yellow-400">📋 Điều kiện:</span> {voucherInfo.conditions}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Email Form */}
-                                    {!emailSent ? (
-                                        <div className="mb-4">
-                                            <p className="text-white/70 text-sm mb-2">Nhận voucher qua email:</p>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="email"
-                                                    value={voucherEmail}
-                                                    onChange={(e) => setVoucherEmail(e.target.value)}
-                                                    placeholder="email@example.com"
-                                                    className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 text-sm"
-                                                />
-                                                <button
-                                                    onClick={handleSendVoucherEmail}
-                                                    disabled={!voucherEmail || sendingEmail}
-                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition text-sm font-medium"
-                                                >
-                                                    {sendingEmail ? '...' : '📧 Gửi'}
-                                                </button>
+                                    {wonPrize.type === 'no_prize' ? (
+                                        <>
+                                            <p className="text-green-600 font-semibold text-center mb-4">Chúc bạn may mắn lần sau!</p>
+                                            <div className="text-6xl text-center mb-4">❄️</div>
+                                        </>
+                                    ) : wonPrize.type === 'voucher' && voucherInfo ? (
+                                        <>
+                                            <div className="text-center mb-4">
+                                                <p className="text-green-600 font-semibold">Bạn nhận được</p>
+                                                <p className="text-2xl font-bold text-red-500 drop-shadow-sm" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>{wonPrize.name}</p>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="mb-4 p-3 bg-green-600/30 rounded-xl border border-green-400/50">
-                                            <p className="text-green-300 text-sm">✅ Đã gửi voucher đến email của bạn!</p>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    <div className="text-6xl mb-4">🎁</div>
-                                    <h3 className="text-xl font-bold text-yellow-300 mb-2">🎅 Chúc mừng Giáng sinh! 🎅</h3>
-                                    <p className="text-2xl font-bold text-white mb-4">{wonPrize.name}</p>
-                                    <p className="text-yellow-100/70 mb-6">🎄 Vui lòng liên hệ nhân viên để nhận quà 🎄</p>
-                                </>
-                            )}
 
-                            <div className="flex gap-3">
-                                {session && session.remaining_turns > 0 ? (
+                                            {/* Voucher Code Card */}
+                                            <div className="bg-white border-2 border-dashed border-amber-400 rounded-2xl p-4 mb-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="text-4xl">🎅</div>
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-400 text-sm mb-2">Mã ưu đãi độc quyền</p>
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <p className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider">
+                                                                {voucherInfo.voucher_code}
+                                                            </p>
+                                                            <button
+                                                                onClick={() => navigator.clipboard.writeText(voucherInfo.voucher_code)}
+                                                                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition shadow-md"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                                                Copy
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Voucher Details */}
+                                            <div className="bg-green-50 rounded-2xl p-4 mb-4 space-y-3">
+                                                <div className="flex items-center gap-3 text-gray-700">
+                                                    <span className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.736 6.979C9.208 6.193 9.696 6 10 6c.304 0 .792.193 1.264.979a1 1 0 001.715-1.029C12.279 4.784 11.232 4 10 4s-2.279.784-2.979 1.95c-.285.475-.507 1-.67 1.55H6a1 1 0 000 2h.013a9.358 9.358 0 000 1H6a1 1 0 100 2h.351c.163.55.385 1.075.67 1.55C7.721 15.216 8.768 16 10 16s2.279-.784 2.979-1.95a1 1 0 10-1.715-1.029c-.472.786-.96.979-1.264.979-.304 0-.792-.193-1.264-.979a4.265 4.265 0 01-.264-.521H10a1 1 0 100-2H8.017a7.36 7.36 0 010-1H10a1 1 0 100-2H8.472a4.265 4.265 0 01.264-.521z" clipRule="evenodd" fillRule="evenodd" /></svg>
+                                                    </span>
+                                                    <span>Trị giá:</span>
+                                                    <span className="font-bold text-red-500">{new Intl.NumberFormat('vi-VN').format(voucherInfo.value)}đ</span>
+                                                </div>
+                                                {voucherInfo.expire_date && (
+                                                    <div className="flex items-center gap-3 text-gray-700">
+                                                        <span className="w-7 h-7 bg-gray-300 rounded flex items-center justify-center">
+                                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                        </span>
+                                                        <span>Hết hạn:</span>
+                                                        <span className="font-bold">{new Date(voucherInfo.expire_date).toLocaleDateString('vi-VN')}</span>
+                                                    </div>
+                                                )}
+                                                {voucherInfo.conditions && (
+                                                    <div className="flex items-start gap-3 text-gray-600">
+                                                        <span className="w-7 h-7 bg-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                                                        </span>
+                                                        <span>{voucherInfo.conditions}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Email Form */}
+                                            <div className="mb-4">
+                                                <p className="text-gray-700 font-semibold mb-2">Nhận voucher qua email:</p>
+                                                {!emailSent ? (
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="email"
+                                                            value={voucherEmail}
+                                                            onChange={(e) => setVoucherEmail(e.target.value)}
+                                                            placeholder="Nhập email của bạn..."
+                                                            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 placeholder:text-gray-400 focus:border-green-500 focus:outline-none"
+                                                        />
+                                                        <button
+                                                            onClick={handleSendVoucherEmail}
+                                                            disabled={!voucherEmail || sendingEmail}
+                                                            className="px-5 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50 transition font-semibold flex items-center gap-1"
+                                                        >
+                                                            {sendingEmail ? '...' : 'Gửi'}
+                                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-3 bg-green-100 rounded-xl border border-green-300 text-center">
+                                                        <p className="text-green-700 text-sm">Đã gửi voucher đến email của bạn!</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Physical Prize */}
+                                            <div className="text-center mb-4">
+                                                <p className="text-green-600 font-semibold">Bạn nhận được</p>
+                                                <p className="text-2xl font-bold text-red-500 drop-shadow-sm" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>{wonPrize.name}</p>
+                                            </div>
+
+                                            {/* Prize Display Card */}
+                                            <div className="bg-white border-2 border-dashed border-amber-400 rounded-2xl p-4 mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-4xl">🎁</div>
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-400 text-sm mb-1">Phần thưởng của bạn</p>
+                                                        <p className="text-xl font-bold text-gray-800">{wonPrize.name}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Instructions */}
+                                            <div className="bg-green-50 rounded-2xl p-4 mb-4 text-center">
+                                                <p className="text-gray-700">🎅 Vui lòng liên hệ nhân viên để nhận quà 🎅</p>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Action Button */}
                                     <button
-                                        onClick={handlePlayAgain}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition border-2 border-yellow-400"
+                                        onClick={session && session.remaining_turns > 0 ? handlePlayAgain : handleNewInvoice}
+                                        className="w-full px-4 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition flex items-center justify-center gap-2 border border-gray-200"
                                     >
-                                        🎁 Quay tiếp ({session.remaining_turns} lượt)
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                        {session && session.remaining_turns > 0
+                                            ? `Quay tiếp (${session.remaining_turns} lượt)`
+                                            : 'Nhập hóa đơn khác'
+                                        }
                                     </button>
-                                ) : (
-                                    <button
-                                        onClick={handleNewInvoice}
-                                        className="flex-1 px-4 py-3 bg-white/20 text-white font-medium rounded-xl hover:bg-white/30 transition"
-                                    >
-                                        🎄 Nhập hóa đơn khác
-                                    </button>
-                                )}
+                                </div>
+
+                                {/* Bottom decorations */}
+                                <div className="absolute bottom-4 left-4 text-2xl">🎄</div>
+                                <div className="absolute bottom-4 right-4 text-2xl">🎁</div>
                             </div>
                         </div>
                     </div>
                 )}
 
+
                 {/* History Prize Detail Modal */}
                 {selectedHistoryItem && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-gradient-to-b from-red-800 to-green-900 rounded-2xl p-6 max-w-md w-full text-center border-4 border-yellow-400 shadow-2xl">
-                            <div className="text-5xl mb-4">🎁</div>
-                            <h3 className="text-2xl font-bold text-yellow-300 mb-2">
-                                {selectedHistoryItem.prize_name}
-                            </h3>
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a472a]/90"
+                        onClick={(e) => e.target === e.currentTarget && setSelectedHistoryItem(null)}
+                    >
+                        <div className="w-full max-w-md mx-auto">
+                            {/* Main modal with green gradient header */}
+                            <div className="bg-gradient-to-b from-green-100 via-white to-white rounded-3xl overflow-hidden shadow-2xl relative">
+                                {/* Close button */}
+                                <button
+                                    onClick={() => setSelectedHistoryItem(null)}
+                                    className="absolute top-3 right-3 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition z-10"
+                                >
+                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
 
-                            {selectedHistoryItem.voucher ? (
-                                <>
-                                    <div className="bg-yellow-400 text-gray-900 px-6 py-4 rounded-xl my-4 shadow-lg">
-                                        <p className="text-sm text-gray-700 mb-1">Mã Voucher</p>
-                                        <p className="text-2xl font-bold tracking-wider">
-                                            {selectedHistoryItem.voucher.code}
-                                        </p>
+                                {/* Corner decorations */}
+                                <div className="absolute top-3 left-3 text-2xl">🎄</div>
+                                <div className="absolute top-2 right-14 text-lg">❄️</div>
+
+                                {/* Content */}
+                                <div className="p-6 pt-10">
+                                    {/* Header */}
+                                    <div className="text-center mb-5">
+                                        <p className="text-gray-600 text-sm mb-2">🎄Mắt Kính Tâm Đức</p>
+                                        <h2 className="text-2xl font-bold italic mb-2">
+                                            <span className="text-red-500">MERRY</span>{' '}
+                                            <span className="text-green-600">CHRISTMAS</span>{' '}
+                                            <span>🎄</span>
+                                        </h2>
                                     </div>
-                                    <p className="text-xl font-bold text-white mb-3">
-                                        Trị giá: {new Intl.NumberFormat('vi-VN').format(selectedHistoryItem.voucher.value)}đ
-                                    </p>
-                                    <div className="text-left bg-white/10 rounded-lg p-4 text-sm text-white/80 space-y-2">
-                                        <p>
-                                            <span className="text-yellow-300">📅 Hết hạn:</span>{' '}
-                                            {new Date(selectedHistoryItem.voucher.expire_date).toLocaleDateString('vi-VN')}
-                                        </p>
-                                        {selectedHistoryItem.voucher.conditions && (
-                                            <p>
-                                                <span className="text-yellow-300">📋 Điều kiện:</span>{' '}
-                                                {selectedHistoryItem.voucher.conditions}
-                                            </p>
-                                        )}
+
+                                    {/* Prize Name */}
+                                    <div className="text-center mb-4">
+                                        <p className="text-green-600 font-semibold">Bạn nhận được</p>
+                                        <p className="text-2xl font-bold text-red-500 drop-shadow-sm" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>{selectedHistoryItem.prize_name}</p>
                                     </div>
-                                </>
-                            ) : (
-                                <div className="text-white/80 my-4">
-                                    {selectedHistoryItem.prize_type === 'physical' && selectedHistoryItem.prize_description && (
-                                        <p>{selectedHistoryItem.prize_description}</p>
-                                    )}
-                                    {selectedHistoryItem.prize_value && (
-                                        <p className="text-xl font-bold text-white mt-2">
-                                            Trị giá: {new Intl.NumberFormat('vi-VN').format(selectedHistoryItem.prize_value)}đ
-                                        </p>
+
+                                    {selectedHistoryItem.voucher ? (
+                                        <>
+                                            {/* Voucher Code Card */}
+                                            <div className="bg-white border-2 border-dashed border-amber-400 rounded-2xl p-4 mb-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="text-4xl">🎅</div>
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-400 text-sm mb-2">Mã ưu đãi độc quyền</p>
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <p className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider">
+                                                                {selectedHistoryItem.voucher.code}
+                                                            </p>
+                                                            <button
+                                                                onClick={() => navigator.clipboard.writeText(selectedHistoryItem.voucher!.code)}
+                                                                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition shadow-md"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                                                Copy
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Voucher Details */}
+                                            <div className="bg-green-50 rounded-2xl p-4 space-y-3">
+                                                <div className="flex items-center gap-3 text-gray-700">
+                                                    <span className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.736 6.979C9.208 6.193 9.696 6 10 6c.304 0 .792.193 1.264.979a1 1 0 001.715-1.029C12.279 4.784 11.232 4 10 4s-2.279.784-2.979 1.95c-.285.475-.507 1-.67 1.55H6a1 1 0 000 2h.013a9.358 9.358 0 000 1H6a1 1 0 100 2h.351c.163.55.385 1.075.67 1.55C7.721 15.216 8.768 16 10 16s2.279-.784 2.979-1.95a1 1 0 10-1.715-1.029c-.472.786-.96.979-1.264.979-.304 0-.792-.193-1.264-.979a4.265 4.265 0 01-.264-.521H10a1 1 0 100-2H8.017a7.36 7.36 0 010-1H10a1 1 0 100-2H8.472a4.265 4.265 0 01.264-.521z" clipRule="evenodd" fillRule="evenodd" /></svg>
+                                                    </span>
+                                                    <span>Trị giá:</span>
+                                                    <span className="font-bold text-red-500">{new Intl.NumberFormat('vi-VN').format(selectedHistoryItem.voucher.value)}đ</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-gray-700">
+                                                    <span className="w-7 h-7 bg-gray-300 rounded flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                    </span>
+                                                    <span>Hết hạn:</span>
+                                                    <span className="font-bold">{new Date(selectedHistoryItem.voucher.expire_date).toLocaleDateString('vi-VN')}</span>
+                                                </div>
+                                                {selectedHistoryItem.voucher.conditions && (
+                                                    <div className="flex items-start gap-3 text-gray-600">
+                                                        <span className="w-7 h-7 bg-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                                                        </span>
+                                                        <span>{selectedHistoryItem.voucher.conditions}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Physical Prize Card */}
+                                            <div className="bg-white border-2 border-dashed border-amber-400 rounded-2xl p-4 mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-4xl">🎁</div>
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-400 text-sm mb-1">Phần thưởng của bạn</p>
+                                                        <p className="text-xl font-bold text-gray-800">{selectedHistoryItem.prize_name}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Instructions */}
+                                            <div className="bg-green-50 rounded-2xl p-4 text-center">
+                                                <p className="text-gray-700">🎅 Vui lòng liên hệ nhân viên để nhận quà 🎅</p>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
-                            )}
 
-                            <button
-                                onClick={() => setSelectedHistoryItem(null)}
-                                className="mt-4 w-full px-6 py-3 bg-white/20 text-white font-medium rounded-xl hover:bg-white/30 transition"
-                            >
-                                Đóng
-                            </button>
+                                {/* Bottom decorations */}
+                                <div className="absolute bottom-4 left-4 text-2xl">🎄</div>
+                                <div className="absolute bottom-4 right-4 text-2xl">🎁</div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -727,31 +836,31 @@ function TermsAccordion() {
         {
             title: '1. Điều kiện tham gia',
             content: `• Chương trình áp dụng cho tất cả khách hàng mua hàng tại hệ thống Mắt Kính Tâm Đức.
-• Mỗi hóa đơn mua hàng hợp lệ sẽ được tham gia quay thưởng theo giá trị hóa đơn.
-• Hóa đơn phải được thanh toán đầy đủ và không áp dụng cho đơn hàng đã hoàn trả.
-• Mỗi hóa đơn chỉ được sử dụng một lần để tham gia chương trình.`
+            • Mỗi hóa đơn mua hàng hợp lệ sẽ được tham gia quay thưởng theo giá trị hóa đơn.
+            • Hóa đơn phải được thanh toán đầy đủ và không áp dụng cho đơn hàng đã hoàn trả.
+            • Mỗi hóa đơn chỉ được sử dụng một lần để tham gia chương trình.`
         },
         {
             title: '2. Quy định về giải thưởng',
             content: `• Giải thưởng được xác định ngẫu nhiên bởi hệ thống.
-• Voucher giảm giá có thời hạn sử dụng và điều kiện áp dụng riêng.
-• Quà tặng vật lý cần liên hệ nhân viên cửa hàng để nhận.
-• Giải thưởng không được quy đổi thành tiền mặt.
-• Mỗi voucher chỉ được sử dụng một lần và không cộng gộp với các chương trình khác.`
+            • Voucher giảm giá có thời hạn sử dụng và điều kiện áp dụng riêng.
+            • Quà tặng vật lý cần liên hệ nhân viên cửa hàng để nhận.
+            • Giải thưởng không được quy đổi thành tiền mặt.
+            • Mỗi voucher chỉ được sử dụng một lần và không cộng gộp với các chương trình khác.`
         },
         {
             title: '3. Thời gian và phạm vi áp dụng',
             content: `• Chương trình có thời hạn theo từng đợt khuyến mãi.
-• Áp dụng tại tất cả chi nhánh thuộc hệ thống Mắt Kính Tâm Đức.
-• Ban tổ chức có quyền kết thúc chương trình sớm khi hết quà tặng.
-• Thời gian áp dụng voucher được ghi rõ trên từng mã voucher.`
+            • Áp dụng tại tất cả chi nhánh thuộc hệ thống Mắt Kính Tâm Đức.
+            • Ban tổ chức có quyền kết thúc chương trình sớm khi hết quà tặng.
+            • Thời gian áp dụng voucher được ghi rõ trên từng mã voucher.`
         },
         {
             title: '4. Quy định chung',
             content: `• Ban tổ chức có quyền từ chối các trường hợp gian lận hoặc vi phạm điều khoản.
-• Trong trường hợp phát sinh tranh chấp, quyết định của Ban tổ chức là quyết định cuối cùng.
-• Bằng việc tham gia chương trình, khách hàng đồng ý với các điều khoản trên.
-• Mọi thắc mắc xin liên hệ nhân viên cửa hàng hoặc hotline để được hỗ trợ.`
+            • Trong trường hợp phát sinh tranh chấp, quyết định của Ban tổ chức là quyết định cuối cùng.
+            • Bằng việc tham gia chương trình, khách hàng đồng ý với các điều khoản trên.
+            • Mọi thắc mắc xin liên hệ nhân viên cửa hàng hoặc hotline để được hỗ trợ.`
         }
     ];
 
